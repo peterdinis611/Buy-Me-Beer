@@ -1,0 +1,49 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div
+  class="mx-auto max-w-5xl px-4 py-10"
+  x-data="revenueChart(<%- JSON.stringify({ chart, chartMax, days }) %>)"
+>
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="font-display text-3xl font-bold">Analytics</h1>
+      <p class="mt-2 text-white/50">Revenue overview and CSV export.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="/dashboard/analytics?days=30" class="<%= days === 30 ? 'btn-primary' : 'btn-secondary' %> text-sm">30 days</a>
+      <a href="/dashboard/analytics?days=90" class="<%= days === 90 ? 'btn-primary' : 'btn-secondary' %> text-sm">90 days</a>
+      <a href="/dashboard/analytics/export.csv?days=<%= days %>" class="btn-secondary text-sm">Export CSV</a>
+    </div>
+  </div>
+
+  <div class="mt-8 grid gap-4 sm:grid-cols-2">
+    <div class="card">
+      <p class="text-xs uppercase tracking-wide text-white/40">Period total</p>
+      <p class="mt-2 text-3xl font-bold text-brand-beer"><%= formatMoney(monthTotal) %></p>
+    </div>
+    <div class="card">
+      <p class="text-xs uppercase tracking-wide text-white/40">Supports</p>
+      <p class="mt-2 text-3xl font-bold"><%= monthCount %></p>
+    </div>
+  </div>
+
+  <div class="card mt-8">
+    <p class="text-sm font-medium">Daily revenue</p>
+    <div class="mt-6 flex h-48 items-end gap-1 overflow-x-auto pb-2">
+      <template x-for="bar in chart" :key="bar.date">
+        <div class="flex min-w-[10px] flex-1 flex-col items-center justify-end gap-2">
+          <div
+            class="w-full rounded-t bg-brand-beer/80 transition-all duration-500"
+            :style="`height:${barHeight(bar.total)}%`"
+            :title="`${bar.date}: ${bar.total}`"
+          ></div>
+          <span class="hidden text-[10px] text-white/30 sm:block" x-text="bar.date.slice(5)"></span>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js" defer></script>
+<%- include('../partials/footer') %>

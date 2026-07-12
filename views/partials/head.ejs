@@ -14,4 +14,4 @@
   <% } %>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
-<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : 'min-h-screen bg-brand-dark font-body text-white antialiased flex flex-col' %>">
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : 'min-h-screen bg-brand-dark font-body text-white antialiased flex flex-col' %>"<% if (typeof inlineStyle !== 'undefined' && inlineStyle) { %> style="<%= inlineStyle %>"<% } %>>

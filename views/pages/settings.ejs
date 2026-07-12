@@ -3,7 +3,7 @@
 
 <div
   class="mx-auto max-w-2xl px-4 py-10"
-  x-data="settingsForm(<%- JSON.stringify({ bio: user.bio, coffeePriceEuros: coffeePriceEuros, beerPriceEuros: beerPriceEuros, goalEuros: goalEuros }) %>)"
+  x-data="settingsForm(<%- JSON.stringify({ bio: user.bio, coffeePriceEuros: coffeePriceEuros, beerPriceEuros: beerPriceEuros, goalEuros: goalEuros, primaryColor: user.primaryColor || '#F5A623' }) %>)"
 >
   <h1 class="animate-fade-in-up font-display text-3xl font-bold">Profile settings</h1>
   <p class="animate-fade-in-up anim-delay-100 mt-2 text-white/50">Customize your public creator page.</p>
@@ -28,6 +28,17 @@
       <div>
         <label class="label" for="avatarUrl">Avatar URL</label>
         <input class="input" type="url" id="avatarUrl" name="avatarUrl" value="<%= user.avatarUrl %>" placeholder="https://..." />
+      </div>
+      <div>
+        <label class="label" for="coverImageUrl">Cover image URL</label>
+        <input class="input" type="url" id="coverImageUrl" name="coverImageUrl" value="<%= user.coverImageUrl %>" placeholder="https://..." />
+      </div>
+      <div>
+        <label class="label" for="primaryColor">Brand color</label>
+        <div class="flex items-center gap-3">
+          <input x-model="primaryColor" class="input flex-1 font-mono uppercase" type="text" id="primaryColor" name="primaryColor" pattern="#[0-9A-Fa-f]{6}" value="<%= user.primaryColor || '#F5A623' %>" />
+          <input x-model="primaryColor" type="color" class="size-11 cursor-pointer rounded-lg border border-white/10 bg-transparent" />
+        </div>
       </div>
       <div>
         <label class="label" for="theme">Theme</label>
@@ -102,6 +113,24 @@
 
     <button type="submit" class="btn-primary w-full py-3">Save changes</button>
   </form>
+
+  <div class="card mt-6 space-y-4">
+    <h2 class="font-semibold">Upload images</h2>
+    <form action="/dashboard/upload/avatar" method="post" enctype="multipart/form-data" class="flex flex-wrap items-end gap-2">
+      <div class="flex-1">
+        <label class="label">Avatar file</label>
+        <input class="input text-sm" type="file" name="avatar" accept="image/*" required />
+      </div>
+      <button type="submit" class="btn-secondary text-sm">Upload avatar</button>
+    </form>
+    <form action="/dashboard/upload/cover" method="post" enctype="multipart/form-data" class="flex flex-wrap items-end gap-2">
+      <div class="flex-1">
+        <label class="label">Cover file</label>
+        <input class="input text-sm" type="file" name="cover" accept="image/*" required />
+      </div>
+      <button type="submit" class="btn-secondary text-sm">Upload cover</button>
+    </form>
+  </div>
 </div>
 
 <%- include('../partials/footer') %>

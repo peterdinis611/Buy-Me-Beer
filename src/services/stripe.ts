@@ -52,7 +52,9 @@ export async function createCheckoutSession(opts: CheckoutOpts) {
           ? `${creator.beerLabel} for ${creator.displayName}`
           : product === "membership" && tier
             ? `${tier.name} — ${creator.displayName}`
-            : `Support for ${creator.displayName}`
+            : product === "commission"
+              ? `Commission for ${creator.displayName}`
+              : `Support for ${creator.displayName}`
 
   const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = isSubscription
     ? {

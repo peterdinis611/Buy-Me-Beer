@@ -1,0 +1,44 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="mx-auto max-w-4xl px-4 py-10">
+  <h1 class="font-display text-3xl font-bold">Commissions</h1>
+  <p class="mt-2 text-white/50">Manage client requests and payment status.</p>
+
+  <% if (items.length === 0) { %>
+    <div class="card mt-8 text-white/50">No commission requests yet.</div>
+  <% } else { %>
+    <div class="mt-8 space-y-4">
+      <% items.forEach(function(item) { %>
+        <div class="card text-left">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p class="font-semibold"><%= item.title %></p>
+              <p class="mt-1 text-sm text-white/50"><%= item.clientName %><% if (item.clientEmail) { %> · <%= item.clientEmail %><% } %></p>
+              <% if (item.description) { %><p class="mt-3 text-sm text-white/70"><%= item.description %></p><% } %>
+              <p class="mt-3 text-lg font-bold text-brand-beer"><%= formatMoney(item.price) %></p>
+            </div>
+            <div class="flex flex-col gap-2 sm:items-end">
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-wide"><%= item.status.replace('_', ' ') %></span>
+              <% if (item.status === 'pending') { %>
+                <a href="/commission/<%= item.id %>/pay" class="btn-primary text-sm text-center">Client payment link</a>
+              <% } %>
+              <form action="/dashboard/commissions/<%= item.id %>/status" method="post" class="flex flex-wrap gap-2">
+                <select class="input py-2 text-sm" name="status">
+                  <option value="pending" <%= item.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                  <option value="paid" <%= item.status === 'paid' ? 'selected' : '' %>>Paid</option>
+                  <option value="in_progress" <%= item.status === 'in_progress' ? 'selected' : '' %>>In progress</option>
+                  <option value="done" <%= item.status === 'done' ? 'selected' : '' %>>Done</option>
+                  <option value="canceled" <%= item.status === 'canceled' ? 'selected' : '' %>>Canceled</option>
+                </select>
+                <button type="submit" class="btn-secondary text-sm">Update</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

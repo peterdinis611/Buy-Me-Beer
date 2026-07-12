@@ -1,0 +1,20 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="mx-auto flex min-h-[50vh] max-w-lg flex-col justify-center px-4 py-16">
+  <h1 class="font-display text-3xl font-bold">Pay commission</h1>
+  <p class="mt-2 text-white/50">For <%= creator.displayName %></p>
+
+  <div class="card mt-8 text-left">
+    <p class="font-semibold"><%= commission.title %></p>
+    <% if (commission.description) { %><p class="mt-2 text-sm text-white/70"><%= commission.description %></p><% } %>
+    <p class="mt-4 text-2xl font-bold text-brand-beer"><%= formatMoney(commission.price) %></p>
+    <p class="mt-2 text-sm text-white/40">Client: <%= commission.clientName %></p>
+  </div>
+
+  <form action="/commission/<%= commission.id %>/pay" method="post" class="mt-6">
+    <button type="submit" class="btn-primary w-full py-3">Proceed to payment</button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

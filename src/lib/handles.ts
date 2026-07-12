@@ -15,6 +15,9 @@ export const RESERVED_HANDLES = new Set([
   "forgot-password",
   "reset-password",
   "verify-email",
+  "commission",
+  "embed",
+  "widget",
 ])
 
 const HANDLE_REGEX = /^[a-zA-Z0-9_-]+$/

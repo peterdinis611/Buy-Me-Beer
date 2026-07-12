@@ -87,6 +87,9 @@ router.post(
             membershipTierId: tierId,
             assetId: null,
             isPublic: false,
+            isGift: false,
+            giftRecipientName: "",
+            giftMessage: "",
           })
 
           const creator = await findUserById(creatorId)
@@ -105,6 +108,9 @@ router.post(
               membershipTierId: tierId,
               assetId: null,
               isPublic: false,
+              isGift: false,
+              giftRecipientName: "",
+              giftMessage: "",
               createdAt: new Date(),
             }
             await sendCreatorNewSupportEmail(creator, support)

@@ -4,26 +4,39 @@ import {
   createAuthToken,
   deleteAsset,
   deleteMembershipTier,
+  deletePost,
   findUserById,
   formatMoney,
   getActiveMemberships,
   getAllShopAssets,
+  getCommissionsForCreator,
+  getCompletedSupportsSince,
   getCreatorStats,
   getMembershipTiers,
+  getPostsForCreator,
   isHandleTaken,
+  updateCommission,
   updateUser,
   upsertAsset,
   upsertMembershipTier,
+  upsertPost,
 } from "../db/queries.js"
 import { requireAuth, requireVerifiedEmail } from "../middleware/auth.js"
 import { sendVerificationEmail } from "../services/email.js"
 import { sseHub } from "../services/sse.js"
+import { bucketRevenueByDay, maxDailyTotal, supportsToCsv } from "../lib/analytics.js"
+import { normalizePrimaryColor } from "../lib/branding.js"
 import { calculateGoalProgress } from "../lib/goals.js"
 import { centsToEuros, eurosToCents } from "../lib/money.js"
 import { buildProfileUrl, normalizeGithubUsername, normalizeTwitterHandle, normalizeWebsiteUrl } from "../lib/social.js"
+import { imageUpload, publicUploadUrl } from "../middleware/upload.js"
 import {
   changePasswordSchema,
+  commissionStatusSchema,
   firstValidationError,
+  integrationsSchema,
+  parseFormBoolean,
+  postSchema,
   profileFromSettings,
   profileSettingsSchema,
   shopAssetSchema,
@@ -105,6 +118,8 @@ router.post("/settings", async (req, res) => {
   const updated = await updateUser(user.id, {
     ...profile,
     avatarUrl: profile.avatarUrl || user.avatarUrl,
+    primaryColor: normalizePrimaryColor(profile.primaryColor),
+    coverImageUrl: profile.coverImageUrl || user.coverImageUrl,
     website: normalizeWebsiteUrl(profile.website),
     twitter: normalizeTwitterHandle(profile.twitter),
     github: normalizeGithubUsername(profile.github),
@@ -258,6 +273,196 @@ router.get("/qr.png", requireAuth, async (req, res) => {
   } catch {
     res.status(500).send("QR generation failed")
   }
+})
+
+router.post("/upload/avatar", (req, res, next) => {
+  imageUpload.single("avatar")(req, res, (err) => {
+    if (err) {
+      req.session.flash = { type: "error", message: err instanceof Error ? err.message : "Upload failed." }
+      return res.redirect("/dashboard/settings")
+    }
+    next()
+  })
+}, async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+
+  if (!req.file) {
+    req.session.flash = { type: "error", message: "Choose an image to upload." }
+    return res.redirect("/dashboard/settings")
+  }
+
+  const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`
+  await updateUser(user.id, { avatarUrl: publicUploadUrl(req.file.filename, baseUrl) })
+  req.session.flash = { type: "success", message: "Avatar uploaded." }
+  res.redirect("/dashboard/settings")
+})
+
+router.post("/upload/cover", (req, res, next) => {
+  imageUpload.single("cover")(req, res, (err) => {
+    if (err) {
+      req.session.flash = { type: "error", message: err instanceof Error ? err.message : "Upload failed." }
+      return res.redirect("/dashboard/settings")
+    }
+    next()
+  })
+}, async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+
+  if (!req.file) {
+    req.session.flash = { type: "error", message: "Choose a cover image to upload." }
+    return res.redirect("/dashboard/settings")
+  }
+
+  const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`
+  await updateUser(user.id, { coverImageUrl: publicUploadUrl(req.file.filename, baseUrl) })
+  req.session.flash = { type: "success", message: "Cover image uploaded." }
+  res.redirect("/dashboard/settings")
+})
+
+router.get("/posts", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+  const items = await getPostsForCreator(user.id, true)
+  res.render("pages/posts", { title: "Posts / Updates", user, items })
+})
+
+router.post("/posts", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+
+  const parsed = postSchema.safeParse(req.body)
+  if (!parsed.success) {
+    req.session.flash = { type: "error", message: firstValidationError(parsed) }
+    return res.redirect("/dashboard/posts")
+  }
+
+  const { id, title, body = "", visibility, published } = parsed.data
+  await upsertPost(user.id, {
+    id,
+    title: title.trim(),
+    body: body.trim(),
+    visibility,
+    published: published === undefined ? true : parseFormBoolean(published),
+  })
+  req.session.flash = { type: "success", message: "Post saved." }
+  res.redirect("/dashboard/posts")
+})
+
+router.post("/posts/:id/delete", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+  await deletePost(user.id, req.params.id!)
+  req.session.flash = { type: "success", message: "Post deleted." }
+  res.redirect("/dashboard/posts")
+})
+
+router.get("/analytics", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+
+  const days = Number(req.query.days) === 90 ? 90 : 30
+  const since = new Date()
+  since.setHours(0, 0, 0, 0)
+  since.setDate(since.getDate() - (days - 1))
+
+  const supports = await getCompletedSupportsSince(user.id, since)
+  const chart = bucketRevenueByDay(
+    supports.map((s) => ({ createdAt: s.createdAt, amount: s.amount })),
+    days
+  )
+
+  res.render("pages/analytics", {
+    title: "Analytics",
+    user,
+    days,
+    chart,
+    chartMax: maxDailyTotal(chart),
+    formatMoney,
+    monthTotal: supports.reduce((sum, s) => sum + s.amount, 0),
+    monthCount: supports.length,
+  })
+})
+
+router.get("/analytics/export.csv", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+
+  const days = Number(req.query.days) === 90 ? 90 : 30
+  const since = new Date()
+  since.setHours(0, 0, 0, 0)
+  since.setDate(since.getDate() - (days - 1))
+
+  const supports = await getCompletedSupportsSince(user.id, since)
+  const csv = supportsToCsv(
+    supports.map((s) => ({
+      createdAt: s.createdAt,
+      supporterName: s.supporterName,
+      supporterEmail: s.supporterEmail,
+      amount: s.amount,
+      product: s.product,
+      message: s.message,
+      isGift: s.isGift,
+      giftRecipientName: s.giftRecipientName,
+    }))
+  )
+
+  res.setHeader("Content-Type", "text/csv; charset=utf-8")
+  res.setHeader("Content-Disposition", `attachment; filename="supports-${days}d.csv"`)
+  res.send(csv)
+})
+
+router.get("/commissions", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+  const items = await getCommissionsForCreator(user.id)
+  res.render("pages/commissions", { title: "Commissions", user, items, formatMoney })
+})
+
+router.post("/commissions/:id/status", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+
+  const parsed = commissionStatusSchema.safeParse(req.body)
+  if (!parsed.success) {
+    req.session.flash = { type: "error", message: firstValidationError(parsed) }
+    return res.redirect("/dashboard/commissions")
+  }
+
+  const commission = (await getCommissionsForCreator(user.id)).find((c) => c.id === req.params.id)
+  if (!commission) {
+    req.session.flash = { type: "error", message: "Commission not found." }
+    return res.redirect("/dashboard/commissions")
+  }
+
+  await updateCommission(commission.id, { status: parsed.data.status })
+  req.session.flash = { type: "success", message: "Commission updated." }
+  res.redirect("/dashboard/commissions")
+})
+
+router.get("/integrations", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+  res.render("pages/integrations", { title: "Integrations", user })
+})
+
+router.post("/integrations", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+
+  const parsed = integrationsSchema.safeParse(req.body)
+  if (!parsed.success) {
+    req.session.flash = { type: "error", message: firstValidationError(parsed) }
+    return res.redirect("/dashboard/integrations")
+  }
+
+  await updateUser(user.id, {
+    discordWebhookUrl: parsed.data.discordWebhookUrl ?? "",
+    slackWebhookUrl: parsed.data.slackWebhookUrl ?? "",
+  })
+  req.session.flash = { type: "success", message: "Integrations saved." }
+  res.redirect("/dashboard/integrations")
 })
 
 export default router

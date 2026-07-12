@@ -391,6 +391,15 @@ export async function createCommission(
   return findCommission(id)
 }
 
+export async function findCommissionBySupportId(supportId: string) {
+  const rows = await db
+    .select()
+    .from(commissions)
+    .where(eq(commissions.supportId, supportId))
+    .limit(1)
+  return rows[0]
+}
+
 export async function updateCommission(id: string, patch: Partial<Commission>) {
   await db
     .update(commissions)

@@ -1,0 +1,55 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="mx-auto max-w-3xl px-4 py-10">
+  <h1 class="font-display text-3xl font-bold">Posts / Updates</h1>
+  <p class="mt-2 text-white/50">Share public updates or member-only content.</p>
+
+  <form action="/dashboard/posts" method="post" class="card mt-8 space-y-4">
+    <h2 class="font-semibold">New post</h2>
+    <input class="input" type="text" name="title" placeholder="Title" required maxlength="120" />
+    <textarea class="input min-h-[120px] resize-y" name="body" placeholder="Write your update…" maxlength="5000"></textarea>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="label" for="visibility">Visibility</label>
+        <select class="input" id="visibility" name="visibility">
+          <option value="public">Public</option>
+          <option value="members">Members only</option>
+        </select>
+      </div>
+      <div class="flex items-end">
+        <label class="flex cursor-pointer items-center gap-2 text-sm">
+          <input type="hidden" name="published" value="true" />
+          <input type="checkbox" name="published" value="true" checked class="size-4 rounded accent-brand-beer" />
+          Published
+        </label>
+      </div>
+    </div>
+    <button type="submit" class="btn-primary">Publish</button>
+  </form>
+
+  <% if (items.length > 0) { %>
+    <div class="mt-10 space-y-4">
+      <% items.forEach(function(post) { %>
+        <div class="card text-left">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p class="font-semibold"><%= post.title %></p>
+              <p class="mt-1 text-xs text-white/40">
+                <%= post.visibility === 'members' ? 'Members only' : 'Public' %>
+                · <%= post.published ? 'Published' : 'Draft' %>
+                · <%= new Date(post.createdAt).toLocaleDateString() %>
+              </p>
+            </div>
+            <form action="/dashboard/posts/<%= post.id %>/delete" method="post">
+              <button type="submit" class="btn-ghost text-xs text-red-300">Delete</button>
+            </form>
+          </div>
+          <% if (post.body) { %><p class="mt-3 whitespace-pre-wrap text-sm text-white/70"><%= post.body %></p><% } %>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

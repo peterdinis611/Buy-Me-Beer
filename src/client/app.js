@@ -85,6 +85,9 @@ Alpine.data("supportCheckout", (config) => ({
   email: "",
   message: "",
   isPublic: true,
+  isGift: false,
+  giftRecipientName: "",
+  giftMessage: "",
   submitting: false,
   config,
 
@@ -165,6 +168,7 @@ Alpine.data("settingsForm", (initial) => ({
   coffeePriceEuros: initial.coffeePriceEuros ?? 5,
   beerPriceEuros: initial.beerPriceEuros ?? 8,
   goalEuros: initial.goalEuros ?? 0,
+  primaryColor: initial.primaryColor || "#F5A623",
   get bioRemaining() {
     return 500 - this.bio.length
   },
@@ -176,6 +180,16 @@ Alpine.data("settingsForm", (initial) => ({
   },
   goalPreview() {
     return this.goalEuros > 0 ? formatMoney(Math.round(this.goalEuros * 100)) : "Off"
+  },
+}))
+
+Alpine.data("revenueChart", (initial) => ({
+  chart: initial.chart,
+  chartMax: initial.chartMax || 1,
+  days: initial.days,
+  barHeight(total) {
+    if (!this.chartMax) return 4
+    return Math.max(4, Math.round((total / this.chartMax) * 100))
   },
 }))
 

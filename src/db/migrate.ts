@@ -116,7 +116,7 @@ export async function seedDemoUser() {
       })
     }
 
-    const { getAllShopAssets, upsertAsset } = await import("./queries.js")
+    const { getAllShopAssets, upsertAsset, upsertPost } = await import("./queries.js")
     const shop = await getAllShopAssets(demo.id)
     if (shop.length === 0) {
       await upsertAsset(demo.id, {
@@ -124,6 +124,23 @@ export async function seedDemoUser() {
         description: "PDF guide + wallpaper pack",
         src: "https://example.com/downloads/starter-pack.zip",
         price: 500,
+      })
+    }
+
+    const { getPostsForCreator } = await import("./queries.js")
+    const demoPosts = await getPostsForCreator(demo.id, true)
+    if (demoPosts.length === 0) {
+      await upsertPost(demo.id, {
+        title: "Welcome members!",
+        body: "Thanks for joining — here is early access to my process notes and behind-the-scenes updates.",
+        visibility: "members",
+        published: true,
+      })
+      await upsertPost(demo.id, {
+        title: "July update",
+        body: "Working on new content and shop items. Public posts appear here for everyone.",
+        visibility: "public",
+        published: true,
       })
     }
   }
