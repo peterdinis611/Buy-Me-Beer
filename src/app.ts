@@ -3,6 +3,7 @@ import session from "express-session"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { flashToLocals } from "./middleware/auth.js"
+import { isPostBodyHtml, postBodyPreview, sanitizePostBody } from "./lib/postBody.js"
 import authRoutes from "./routes/auth.js"
 import dashboardRoutes from "./routes/dashboard.js"
 import supportRoutes from "./routes/support.js"
@@ -17,6 +18,9 @@ export function createApp() {
 
   app.set("view engine", "ejs")
   app.set("views", path.join(__dirname, "../views"))
+  app.locals.sanitizePostBody = sanitizePostBody
+  app.locals.isPostBodyHtml = isPostBodyHtml
+  app.locals.postBodyPreview = postBodyPreview
 
   app.use(express.static(path.join(__dirname, "../public")))
 

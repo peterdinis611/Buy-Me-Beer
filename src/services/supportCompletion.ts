@@ -3,7 +3,6 @@ import {
   findAsset,
   findCommissionBySupportId,
   findMembershipBySubscriptionId,
-  findMembershipTier,
   findSupportById,
   findUserById,
   updateCommission,
@@ -16,8 +15,6 @@ import {
   sendShopDownloadEmail,
   sendSupporterThankYouEmail,
 } from "./email.js"
-import { notifyDiscordMembership } from "./discord.js"
-import { notifySlackMembership } from "./slack.js"
 import { sseHub, type SupportReceivedPayload } from "./sse.js"
 
 export function buildSupportReceivedPayload(support: {
@@ -105,19 +102,6 @@ export async function activateMembership(opts: {
     status: "active",
     currentPeriodEnd: opts.currentPeriodEnd ?? null,
   })
-
-  const creator = await findUserById(opts.creatorId)
-  const tier = await findMembershipTier(opts.tierId)
-  if (creator && tier) {
-    const payload = {
-      creatorName: creator.displayName,
-      supporterName: opts.supporterName,
-      supporterEmail: opts.supporterEmail,
-      tierName: tier.name,
-    }
-    if (creator.discordWebhookUrl) await notifyDiscordMembership(creator.discordWebhookUrl, payload)
-    if (creator.slackWebhookUrl) await notifySlackMembership(creator.slackWebhookUrl, payload)
-  }
 
   return membership
 }

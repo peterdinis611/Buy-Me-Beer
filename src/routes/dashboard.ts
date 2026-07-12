@@ -42,6 +42,7 @@ import {
   shopAssetSchema,
   tierSettingsSchema,
 } from "../lib/validation.js"
+import { postBodyPlainText, sanitizePostBody } from "../lib/postBody.js"
 
 const router = Router()
 
@@ -347,10 +348,17 @@ router.post("/posts", async (req, res) => {
   }
 
   const { id, title, body = "", visibility, published } = parsed.data
+  const safeBody = sanitizePostBody(body)
+  const plainLength = postBodyPlainText(safeBody).length
+  if (plainLength > 5000) {
+    req.session.flash = { type: "error", message: "Post body is too long (max 5000 characters)." }
+    return res.redirect("/dashboard/posts")
+  }
+
   await upsertPost(user.id, {
     id,
     title: title.trim(),
-    body: body.trim(),
+    body: safeBody,
     visibility,
     published: published === undefined ? true : parseFormBoolean(published),
   })

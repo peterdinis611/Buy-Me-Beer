@@ -1,137 +1,302 @@
 <%- include('../partials/head', { title }) %>
 <%- include('../partials/dashboard-shell-open', { active: 'settings', user }) %>
 
+<script type="application/json" id="settings-form-config"><%- JSON.stringify({
+  bio: user.bio || '',
+  displayName: user.displayName,
+  handle: user.handle,
+  avatarUrl: user.avatarUrl,
+  coffeePriceEuros: coffeePriceEuros,
+  beerPriceEuros: beerPriceEuros,
+  goalEuros: goalEuros,
+  primaryColor: user.primaryColor || '#F5A623'
+}) %></script>
+
 <div
-  class="mx-auto max-w-2xl"
-  x-data="settingsForm(<%- JSON.stringify({ bio: user.bio, coffeePriceEuros: coffeePriceEuros, beerPriceEuros: beerPriceEuros, goalEuros: goalEuros, primaryColor: user.primaryColor || '#F5A623' }) %>)"
+  class="mx-auto max-w-5xl"
+  x-data="settingsForm(JSON.parse(document.getElementById('settings-form-config').textContent))"
 >
-  <header class="page-header">
-    <h1 class="page-title">Profile settings</h1>
-    <p class="page-subtitle">Customize your public creator page.</p>
+  <header class="page-header flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm text-muted">Creator profile</p>
+      <h1 class="page-title">Profile settings</h1>
+      <p class="page-subtitle">Shape how your public page looks and what supporters can buy.</p>
+    </div>
+    <a href="/<%= user.handle %>" target="_blank" class="btn-secondary shrink-0 text-sm">Preview page ↗</a>
   </header>
 
-  <form action="/dashboard/settings" method="post" class="animate-fade-in-up anim-delay-200 mt-8 space-y-6">
-    <div class="card space-y-4">
-      <h2 class="font-semibold">Basic info</h2>
-      <div>
-        <label class="label" for="displayName">Display name</label>
-        <input class="input" type="text" id="displayName" name="displayName" value="<%= user.displayName %>" required />
-      </div>
-      <div>
-        <label class="label" for="handle">Username</label>
-        <input class="input" type="text" id="handle" name="handle" value="<%= user.handle %>" required pattern="[a-zA-Z0-9_-]+" />
-        <p class="mt-1.5 text-xs text-muted">Changing your username breaks old links — update shared URLs after saving.</p>
-      </div>
-      <div>
-        <label class="label" for="bio">Bio</label>
-        <textarea x-model="bio" class="input min-h-[100px] resize-y" id="bio" name="bio" maxlength="500"></textarea>
-        <p class="mt-1 text-right text-xs text-muted"><span x-text="bioRemaining"></span> characters left</p>
-      </div>
-      <div>
-        <label class="label" for="avatarUrl">Avatar URL</label>
-        <input class="input" type="url" id="avatarUrl" name="avatarUrl" value="<%= user.avatarUrl %>" placeholder="https://..." />
-      </div>
-      <div>
-        <label class="label" for="coverImageUrl">Cover image URL</label>
-        <input class="input" type="url" id="coverImageUrl" name="coverImageUrl" value="<%= user.coverImageUrl %>" placeholder="https://..." />
-      </div>
-      <div>
-        <label class="label" for="primaryColor">Brand color</label>
-        <div class="flex items-center gap-3">
-          <input x-model="primaryColor" class="input flex-1 font-mono uppercase" type="text" id="primaryColor" name="primaryColor" pattern="#[0-9A-Fa-f]{6}" value="<%= user.primaryColor || '#F5A623' %>" />
-          <input x-model="primaryColor" type="color" class="size-11 cursor-pointer rounded-lg border border-app-line bg-transparent" />
+  <div class="settings-layout animate-fade-in-up anim-delay-100">
+    <aside class="settings-preview">
+      <div class="settings-preview-banner" :style="'background: linear-gradient(135deg, ' + primaryColor + '55, transparent)'"></div>
+      <div class="relative px-5 pb-5 pt-0">
+        <img
+          :src="avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + handle"
+          alt=""
+          class="mx-auto -mt-10 size-20 rounded-full border-4 border-app-elevated object-cover shadow-lg"
+          @error="$el.src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + handle"
+        />
+        <div class="mt-4 text-center">
+          <p class="font-display text-lg font-bold text-app-text" x-text="displayName || 'Your name'"></p>
+          <p class="text-sm text-muted">@<span x-text="handle || 'username'"></span></p>
+        </div>
+        <p class="mt-3 line-clamp-3 text-center text-sm text-muted" x-show="bio" x-text="bio"></p>
+        <p class="mt-3 text-center text-xs text-muted" x-show="!bio">Add a bio to tell supporters about you.</p>
+        <div class="mt-4 flex items-center justify-center gap-2">
+          <span class="size-4 rounded-full border border-app-line" :style="'background:' + primaryColor"></span>
+          <span class="font-mono text-xs text-muted" x-text="primaryColor"></span>
+        </div>
+        <div class="mt-5 grid grid-cols-2 gap-2 text-center text-xs">
+          <div class="settings-tip-card">
+            <p class="text-muted">☕ Coffee</p>
+            <p class="mt-1 font-semibold text-accent" x-text="coffeePreview()"></p>
+          </div>
+          <div class="settings-tip-card">
+            <p class="text-muted">🍺 Beer</p>
+            <p class="mt-1 font-semibold text-accent" x-text="beerPreview()"></p>
+          </div>
         </div>
       </div>
-      <div>
-        <label class="label" for="theme">Theme</label>
-        <select class="input" id="theme" name="theme">
-          <option value="warm" <%= user.theme === 'warm' ? 'selected' : '' %>>Warm — coffee & beer gradient</option>
-          <option value="dark" <%= user.theme === 'dark' ? 'selected' : '' %>>Dark — minimal black</option>
-          <option value="minimal" <%= user.theme === 'minimal' ? 'selected' : '' %>>Minimal — light & clean</option>
-        </select>
-        <p class="mt-1.5 text-xs text-muted"><a href="/<%= user.handle %>" target="_blank" class="text-brand-beer hover:underline">Preview your page ↗</a></p>
-      </div>
-    </div>
+    </aside>
 
-    <div class="card space-y-4">
-      <h2 class="font-semibold">Tip amounts</h2>
-      <div class="grid gap-4 sm:grid-cols-2">
+    <div class="space-y-5">
+      <form action="/dashboard/settings" method="post" class="space-y-5">
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-section-icon">👤</span>
+          <div>
+            <h2 class="font-display text-lg font-semibold text-app-text">Basic info</h2>
+            <p class="text-sm text-muted">Name, username, and short bio.</p>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="sm:col-span-2 sm:max-w-md">
+            <label class="label" for="displayName">Display name</label>
+            <input
+              class="input"
+              type="text"
+              id="displayName"
+              name="displayName"
+              value="<%= user.displayName %>"
+              required
+              @input="displayName = $event.target.value"
+            />
+          </div>
+          <div class="sm:col-span-2 sm:max-w-md">
+            <label class="label" for="handle">Username</label>
+            <input
+              class="input"
+              type="text"
+              id="handle"
+              name="handle"
+              value="<%= user.handle %>"
+              required
+              pattern="[a-zA-Z0-9_-]+"
+              @input="handle = $event.target.value"
+            />
+            <p class="mt-1.5 text-xs text-muted">Changing your username breaks old links — update shared URLs after saving.</p>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="label" for="bio">Bio</label>
+            <textarea x-model="bio" class="input min-h-[96px] resize-y" id="bio" name="bio" maxlength="500" placeholder="Tell supporters what you create…"></textarea>
+            <p class="mt-1 text-right text-xs text-muted"><span x-text="bioRemaining"></span> characters left</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-section-icon">🎨</span>
+          <div>
+            <h2 class="font-display text-lg font-semibold text-app-text">Look & feel</h2>
+            <p class="text-sm text-muted">Images, brand color, and page theme.</p>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="label" for="avatarUrl">Avatar URL</label>
+            <input
+              class="input"
+              type="url"
+              id="avatarUrl"
+              name="avatarUrl"
+              value="<%= user.avatarUrl %>"
+              placeholder="https://..."
+              @input="avatarUrl = $event.target.value"
+            />
+          </div>
+          <div>
+            <label class="label" for="coverImageUrl">Cover image URL</label>
+            <input class="input" type="url" id="coverImageUrl" name="coverImageUrl" value="<%= user.coverImageUrl %>" placeholder="https://..." />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="label" for="primaryColor">Brand color</label>
+            <div class="flex items-center gap-3">
+              <input
+                x-model="primaryColor"
+                class="input flex-1 font-mono uppercase"
+                type="text"
+                id="primaryColor"
+                name="primaryColor"
+                pattern="#[0-9A-Fa-f]{6}"
+              />
+              <input
+                type="color"
+                class="size-11 shrink-0 cursor-pointer rounded-lg border border-app-line bg-transparent p-1"
+                :value="primaryColor"
+                @input="onColorPick($event)"
+              />
+            </div>
+          </div>
+          <div class="sm:col-span-2 sm:max-w-md">
+            <label class="label" for="theme">Public page theme</label>
+            <select class="input" id="theme" name="theme">
+              <option value="warm" <%= user.theme === 'warm' ? 'selected' : '' %>>Warm — coffee & beer gradient</option>
+              <option value="dark" <%= user.theme === 'dark' ? 'selected' : '' %>>Dark — minimal black</option>
+              <option value="minimal" <%= user.theme === 'minimal' ? 'selected' : '' %>>Minimal — light & clean</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-section-icon">☕</span>
+          <div>
+            <h2 class="font-display text-lg font-semibold text-app-text">Tip amounts</h2>
+            <p class="text-sm text-muted">Labels and prices shown on your support buttons.</p>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="settings-tip-card space-y-3">
+            <p class="text-sm font-medium text-app-text">☕ Coffee</p>
+            <div>
+              <label class="label" for="coffeeLabel">Button label</label>
+              <input class="input" type="text" id="coffeeLabel" name="coffeeLabel" value="<%= user.coffeeLabel %>" />
+            </div>
+            <div>
+              <label class="label" for="coffeePriceEuros">Price (€)</label>
+              <input x-model.number="coffeePriceEuros" class="input" type="number" id="coffeePriceEuros" name="coffeePriceEuros" min="1" max="1000" step="0.5" />
+              <p class="mt-1 text-xs text-accent" x-text="'Checkout preview: ' + coffeePreview()"></p>
+            </div>
+          </div>
+          <div class="settings-tip-card space-y-3">
+            <p class="text-sm font-medium text-app-text">🍺 Beer</p>
+            <div>
+              <label class="label" for="beerLabel">Button label</label>
+              <input class="input" type="text" id="beerLabel" name="beerLabel" value="<%= user.beerLabel %>" />
+            </div>
+            <div>
+              <label class="label" for="beerPriceEuros">Price (€)</label>
+              <input x-model.number="beerPriceEuros" class="input" type="number" id="beerPriceEuros" name="beerPriceEuros" min="1" max="1000" step="0.5" />
+              <p class="mt-1 text-xs text-accent" x-text="'Checkout preview: ' + beerPreview()"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid gap-5 lg:grid-cols-2">
+        <section class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-section-icon">🔗</span>
+            <div>
+              <h2 class="font-display text-lg font-semibold text-app-text">Social links</h2>
+              <p class="text-sm text-muted">Optional links on your creator page.</p>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="label" for="website">Website</label>
+              <input class="input" type="text" id="website" name="website" value="<%= user.website %>" placeholder="yoursite.com" />
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="label" for="twitter">Twitter / X</label>
+                <input class="input" type="text" id="twitter" name="twitter" value="<%= user.twitter %>" placeholder="username" />
+              </div>
+              <div>
+                <label class="label" for="github">GitHub</label>
+                <input class="input" type="text" id="github" name="github" value="<%= user.github %>" placeholder="username" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <div class="settings-section-head">
+            <span class="settings-section-icon">🎯</span>
+            <div>
+              <h2 class="font-display text-lg font-semibold text-app-text">Funding goal</h2>
+              <p class="text-sm text-muted">Show progress toward a project or purchase.</p>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="label" for="goalTitle">Goal title</label>
+              <input class="input" type="text" id="goalTitle" name="goalTitle" value="<%= user.goalTitle %>" placeholder="New camera gear" />
+            </div>
+            <div>
+              <label class="label" for="goalEuros">Target (€, 0 = off)</label>
+              <input x-model.number="goalEuros" class="input" type="number" id="goalEuros" name="goalEuros" min="0" step="1" />
+              <p class="mt-1 text-xs text-accent" x-text="'Progress bar: ' + goalPreview()"></p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-section-icon">💌</span>
+          <div>
+            <h2 class="font-display text-lg font-semibold text-app-text">Thank-you email</h2>
+            <p class="text-sm text-muted">Optional message sent after a tip (when email is provided).</p>
+          </div>
+        </div>
         <div>
-          <label class="label" for="coffeeLabel">☕ Coffee label</label>
-          <input class="input" type="text" id="coffeeLabel" name="coffeeLabel" value="<%= user.coffeeLabel %>" />
-          <label class="label mt-3" for="coffeePriceEuros">Price (€)</label>
-          <input x-model.number="coffeePriceEuros" class="input" type="number" id="coffeePriceEuros" name="coffeePriceEuros" min="1" max="1000" step="0.5" />
-          <p class="mt-1 text-xs text-brand-beer" x-text="'Preview: ' + coffeePreview()"></p>
+          <label class="label" for="thankYouMessage">Message to supporters</label>
+          <textarea class="input min-h-[88px] resize-y" id="thankYouMessage" name="thankYouMessage" maxlength="500" placeholder="Thanks for the support — it means a lot!"><%= thankYouMessage %></textarea>
         </div>
-        <div>
-          <label class="label" for="beerLabel">🍺 Beer label</label>
-          <input class="input" type="text" id="beerLabel" name="beerLabel" value="<%= user.beerLabel %>" />
-          <label class="label mt-3" for="beerPriceEuros">Price (€)</label>
-          <input x-model.number="beerPriceEuros" class="input" type="number" id="beerPriceEuros" name="beerPriceEuros" min="1" max="1000" step="0.5" />
-          <p class="mt-1 text-xs text-brand-beer" x-text="'Preview: ' + beerPreview()"></p>
+      </section>
+
+      <div class="settings-save-bar">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-sm text-muted">Changes apply to your public page after saving.</p>
+          <button type="submit" class="btn-primary w-full px-8 py-3 sm:w-auto">Save changes</button>
         </div>
       </div>
-    </div>
+      </form>
 
-    <div class="card space-y-4">
-      <h2 class="font-semibold">Social links</h2>
-      <div>
-        <label class="label" for="website">Website</label>
-        <input class="input" type="text" id="website" name="website" value="<%= user.website %>" placeholder="yoursite.com" />
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label class="label" for="twitter">Twitter / X</label>
-          <input class="input" type="text" id="twitter" name="twitter" value="<%= user.twitter %>" placeholder="username" />
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-section-icon">📷</span>
+          <div>
+            <h2 class="font-display text-lg font-semibold text-app-text">Upload images</h2>
+            <p class="text-sm text-muted">Drag & drop a new avatar or cover — uploads apply immediately.</p>
+          </div>
         </div>
-        <div>
-          <label class="label" for="github">GitHub</label>
-          <input class="input" type="text" id="github" name="github" value="<%= user.github %>" placeholder="username" />
+        <div class="grid gap-4 sm:grid-cols-2">
+          <%- include('../partials/image-upload', {
+            action: '/dashboard/upload/avatar',
+            fieldName: 'avatar',
+            variant: 'avatar',
+            title: 'Profile photo',
+            description: 'Shown on your public page and dashboard.',
+            submitLabel: 'Upload avatar',
+            currentUrl: user.avatarUrl,
+            hint: 'Square works best · max 5 MB'
+          }) %>
+          <%- include('../partials/image-upload', {
+            action: '/dashboard/upload/cover',
+            fieldName: 'cover',
+            variant: 'cover',
+            title: 'Cover image',
+            description: 'Banner at the top of your creator page.',
+            submitLabel: 'Upload cover',
+            currentUrl: user.coverImageUrl,
+            hint: 'Wide image · 1200×400 recommended'
+          }) %>
         </div>
-      </div>
+      </section>
     </div>
-
-    <div class="card space-y-4">
-      <h2 class="font-semibold">Funding goal</h2>
-      <div>
-        <label class="label" for="goalTitle">Goal title</label>
-        <input class="input" type="text" id="goalTitle" name="goalTitle" value="<%= user.goalTitle %>" placeholder="New camera gear" />
-      </div>
-      <div>
-        <label class="label" for="goalEuros">Target (€, 0 = off)</label>
-        <input x-model.number="goalEuros" class="input" type="number" id="goalEuros" name="goalEuros" min="0" step="1" />
-        <p class="mt-1 text-xs text-brand-beer" x-text="'Preview: ' + goalPreview()"></p>
-      </div>
-    </div>
-
-    <div class="card space-y-4">
-      <h2 class="font-semibold">Thank-you email</h2>
-      <div>
-        <label class="label" for="thankYouMessage">Message to supporters (optional)</label>
-        <textarea class="input min-h-[88px] resize-y" id="thankYouMessage" name="thankYouMessage" maxlength="500"><%= thankYouMessage %></textarea>
-        <p class="mt-1 text-xs text-muted">Sent by email after a tip (if supporter leaves their email).</p>
-      </div>
-    </div>
-
-    <button type="submit" class="btn-primary w-full py-3">Save changes</button>
-  </form>
-
-  <div class="card mt-6 space-y-4">
-    <h2 class="font-semibold">Upload images</h2>
-    <form action="/dashboard/upload/avatar" method="post" enctype="multipart/form-data" class="flex flex-wrap items-end gap-2">
-      <div class="flex-1">
-        <label class="label">Avatar file</label>
-        <input class="input text-sm" type="file" name="avatar" accept="image/*" required />
-      </div>
-      <button type="submit" class="btn-secondary text-sm">Upload avatar</button>
-    </form>
-    <form action="/dashboard/upload/cover" method="post" enctype="multipart/form-data" class="flex flex-wrap items-end gap-2">
-      <div class="flex-1">
-        <label class="label">Cover file</label>
-        <input class="input text-sm" type="file" name="cover" accept="image/*" required />
-      </div>
-      <button type="submit" class="btn-secondary text-sm">Upload cover</button>
-    </form>
   </div>
 </div>
 

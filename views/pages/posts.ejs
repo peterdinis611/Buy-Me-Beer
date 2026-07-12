@@ -1,57 +1,196 @@
 <%- include('../partials/head', { title }) %>
 <%- include('../partials/dashboard-shell-open', { active: 'posts', user }) %>
 
-<div class="mx-auto max-w-3xl">
-  <header class="page-header">
-    <h1 class="page-title">Posts / Updates</h1>
-    <p class="page-subtitle">Share public updates or member-only content.</p>
+<div class="mx-auto max-w-6xl">
+  <header class="page-header flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm text-muted">Content</p>
+      <h1 class="page-title">Posts / Updates</h1>
+      <p class="page-subtitle">Rich text updates for your public page or members-only feed.</p>
+    </div>
+    <% if (items.length > 0) { %>
+      <p class="text-sm text-muted"><%= items.length %> post<%= items.length === 1 ? '' : 's' %></p>
+    <% } %>
   </header>
 
-  <form action="/dashboard/posts" method="post" class="card-static space-y-4">
-    <h2 class="font-semibold">New post</h2>
-    <input class="input" type="text" name="title" placeholder="Title" required maxlength="120" />
-    <textarea class="input min-h-[120px] resize-y" name="body" placeholder="Write your update…" maxlength="5000"></textarea>
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div>
-        <label class="label" for="visibility">Visibility</label>
-        <select class="input" id="visibility" name="visibility">
-          <option value="public">Public</option>
-          <option value="members">Members only</option>
-        </select>
-      </div>
-      <div class="flex items-end">
-        <label class="flex cursor-pointer items-center gap-2 text-sm">
-          <input type="hidden" name="published" value="true" />
-          <input type="checkbox" name="published" value="true" checked class="size-4 rounded accent-brand-beer" />
-          Published
-        </label>
-      </div>
-    </div>
-    <button type="submit" class="btn-primary">Publish</button>
-  </form>
-
-  <% if (items.length > 0) { %>
-    <div class="mt-10 space-y-4">
-      <% items.forEach(function(post) { %>
-        <div class="card-static text-left">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p class="font-semibold"><%= post.title %></p>
-              <p class="mt-1 text-xs text-muted">
-                <%= post.visibility === 'members' ? 'Members only' : 'Public' %>
-                · <%= post.published ? 'Published' : 'Draft' %>
-                · <%= new Date(post.createdAt).toLocaleDateString() %>
-              </p>
-            </div>
-            <form action="/dashboard/posts/<%= post.id %>/delete" method="post">
-              <button type="submit" class="btn-ghost text-xs text-red-300">Delete</button>
-            </form>
+  <div class="posts-layout animate-fade-in-up anim-delay-100">
+    <form action="/dashboard/posts" method="post" class="post-compose" x-data="postEditor()">
+      <div class="post-compose-head">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h2 class="font-display text-lg font-semibold text-app-text">Compose update</h2>
+            <p class="mt-1 text-sm text-muted">Format text, add links, headings, and lists — what you see is what gets published.</p>
           </div>
-          <% if (post.body) { %><p class="mt-3 whitespace-pre-wrap text-sm text-app-text"><%= post.body %></p><% } %>
+          <p class="hidden shrink-0 text-xs text-muted sm:block"><span x-text="bodyRemaining"></span> chars left</p>
         </div>
-      <% }) %>
-    </div>
-  <% } %>
+      </div>
+
+      <div class="px-5 pt-4 sm:px-6">
+        <label class="label" for="post-title">Title</label>
+        <input
+          id="post-title"
+          x-model="title"
+          class="input text-base font-medium"
+          type="text"
+          name="title"
+          placeholder="What's new?"
+          required
+          maxlength="120"
+        />
+        <p class="mt-1 text-right text-xs text-muted"><span x-text="titleRemaining"></span> left</p>
+      </div>
+
+      <div class="mt-4">
+        <div class="post-toolbar">
+          <div class="post-toolbar-group">
+            <button type="button" class="post-toolbar-btn" :class="active.bold && 'post-toolbar-btn-active'" title="Bold (⌘B)" @click="cmd('toggleBold')"><strong>B</strong></button>
+            <button type="button" class="post-toolbar-btn" :class="active.italic && 'post-toolbar-btn-active'" title="Italic (⌘I)" @click="cmd('toggleItalic')"><em>I</em></button>
+            <button type="button" class="post-toolbar-btn" :class="active.strike && 'post-toolbar-btn-active'" title="Strikethrough (⌘⇧S)" @click="cmd('toggleStrike')"><span class="line-through">S</span></button>
+            <button type="button" class="post-toolbar-btn" :class="active.code && 'post-toolbar-btn-active'" title="Inline code (⌘`)" @click="cmd('toggleCode')">&lt;/&gt;</button>
+            <button type="button" class="post-toolbar-btn" :class="active.link && 'post-toolbar-btn-active'" title="Link (⌘K)" @click="cmd('toggleLink')">🔗</button>
+          </div>
+
+          <span class="post-toolbar-divider" aria-hidden="true"></span>
+
+          <div class="post-toolbar-group relative" @click.outside="headingMenuOpen = false">
+            <button
+              type="button"
+              class="post-toolbar-btn post-toolbar-btn-wide"
+              :class="(active.heading1 || active.heading2 || active.heading3) && 'post-toolbar-btn-active'"
+              title="Headings"
+              @click="headingMenuOpen = !headingMenuOpen"
+            >
+              H<span class="text-[10px] opacity-70">▾</span>
+            </button>
+            <div x-show="headingMenuOpen" x-cloak class="post-toolbar-menu">
+              <button type="button" class="post-toolbar-menu-item" :class="active.heading1 && 'post-toolbar-menu-item-active'" @click="headingCmd('setHeading1')">Heading 1</button>
+              <button type="button" class="post-toolbar-menu-item" :class="active.heading2 && 'post-toolbar-menu-item-active'" @click="headingCmd('setHeading2')">Heading 2</button>
+              <button type="button" class="post-toolbar-menu-item" :class="active.heading3 && 'post-toolbar-menu-item-active'" @click="headingCmd('setHeading3')">Heading 3</button>
+              <button type="button" class="post-toolbar-menu-item" :class="active.paragraph && 'post-toolbar-menu-item-active'" @click="headingCmd('setParagraph')">Paragraph</button>
+            </div>
+          </div>
+
+          <div class="post-toolbar-group">
+            <button type="button" class="post-toolbar-btn" :class="active.bulletList && 'post-toolbar-btn-active'" title="Bullet list" @click="cmd('toggleBulletList')">•</button>
+            <button type="button" class="post-toolbar-btn" :class="active.orderedList && 'post-toolbar-btn-active'" title="Numbered list" @click="cmd('toggleOrderedList')">1.</button>
+            <button type="button" class="post-toolbar-btn" :class="active.blockquote && 'post-toolbar-btn-active'" title="Quote (⌘⇧8)" @click="cmd('toggleBlockquote')">❝</button>
+            <button type="button" class="post-toolbar-btn" :class="active.codeBlock && 'post-toolbar-btn-active'" title="Code block" @click="cmd('toggleCodeBlock')">{ }</button>
+            <button type="button" class="post-toolbar-btn" title="Divider (---)" @click="cmd('insertHorizontalRule')">—</button>
+          </div>
+
+          <span class="post-toolbar-divider" aria-hidden="true"></span>
+
+          <div class="post-toolbar-group">
+            <button type="button" class="post-toolbar-btn" title="Undo (⌘Z)" @click="cmd('undo')">↩</button>
+            <button type="button" class="post-toolbar-btn" title="Redo (⌘⇧Z)" @click="cmd('redo')">↪</button>
+            <button type="button" class="post-toolbar-btn" title="Clear formatting" @click="cmd('clearFormatting')">⌫</button>
+          </div>
+        </div>
+
+        <p class="post-toolbar-hint">Tip: type <code>#</code>, <code>##</code>, <code>></code>, or <code>---</code> at line start for quick formatting.</p>
+
+        <div class="post-prosemirror" x-ref="editorMount"></div>
+        <input type="hidden" name="body" :value="body" />
+      </div>
+
+      <div class="flex flex-col gap-4 border-t border-app-line px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div class="flex flex-wrap items-center gap-3">
+          <div>
+            <p class="label mb-2">Visibility</p>
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="post-visibility-pill"
+                :class="visibility === 'public' && 'post-visibility-pill-active'"
+                @click="visibility = 'public'"
+              >
+                🌍 Public
+              </button>
+              <button
+                type="button"
+                class="post-visibility-pill"
+                :class="visibility === 'members' && 'post-visibility-pill-active'"
+                @click="visibility = 'members'"
+              >
+                ⭐ Members
+              </button>
+            </div>
+            <input type="hidden" name="visibility" :value="visibility" />
+          </div>
+
+          <div class="sm:ml-4">
+            <p class="label mb-2">Status</p>
+            <button
+              type="button"
+              class="post-switch"
+              :class="published && 'post-switch-on'"
+              @click="published = !published"
+              :aria-pressed="published"
+            >
+              <span class="post-switch-knob"></span>
+            </button>
+            <span class="ml-2 text-sm text-muted" x-text="published ? 'Published' : 'Draft'"></span>
+            <input type="hidden" name="published" :value="published ? 'true' : 'false'" />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary w-full px-8 py-3 sm:w-auto" x-text="published ? 'Publish update' : 'Save draft'"></button>
+      </div>
+    </form>
+
+    <aside class="space-y-4" x-data="postDelete()">
+      <div class="flex items-center justify-between">
+        <h2 class="font-display text-lg font-semibold text-app-text">Your posts</h2>
+      </div>
+
+      <% if (items.length === 0) { %>
+        <div class="card-static py-12 text-center">
+          <p class="text-4xl">📝</p>
+          <p class="mt-3 font-medium text-app-text">No posts yet</p>
+          <p class="mt-1 text-sm text-muted">Your published updates will appear here.</p>
+        </div>
+      <% } else { %>
+        <div class="post-list max-h-[calc(100vh-12rem)] overflow-y-auto overscroll-contain pr-1">
+          <% items.forEach(function(post) { %>
+            <article class="post-list-item">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap gap-1.5">
+                    <span class="post-badge <%= post.visibility === 'members' ? 'post-badge-members' : 'post-badge-public' %>">
+                      <%= post.visibility === 'members' ? 'Members' : 'Public' %>
+                    </span>
+                    <% if (!post.published) { %>
+                      <span class="post-badge post-badge-draft">Draft</span>
+                    <% } %>
+                  </div>
+                  <h3 class="mt-2 truncate font-semibold text-app-text"><%= post.title %></h3>
+                  <p class="mt-1 text-xs text-muted"><%= new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) %></p>
+                </div>
+                <button
+                  type="button"
+                  class="btn-ghost shrink-0 px-2 py-1 text-xs text-red-400 hover:text-red-300"
+                  @click="ask('<%= post.id %>')"
+                >
+                  Delete
+                </button>
+              </div>
+              <% if (post.body) { %>
+                <p class="mt-3 line-clamp-3 text-sm text-muted"><%= postBodyPreview(post.body) %></p>
+              <% } %>
+
+              <div x-show="confirmId === '<%= post.id %>'" x-cloak class="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2">
+                <p class="text-xs text-red-300">Delete this post?</p>
+                <button type="button" class="btn-ghost px-2 py-1 text-xs" @click="cancel()">Cancel</button>
+                <button type="button" class="rounded-lg bg-red-500/20 px-2 py-1 text-xs font-medium text-red-200 hover:bg-red-500/30" @click="submit('<%= post.id %>')">Confirm</button>
+              </div>
+
+              <form id="delete-post-<%= post.id %>" action="/dashboard/posts/<%= post.id %>/delete" method="post" class="hidden"></form>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    </aside>
+  </div>
 </div>
 
 <%- include('../partials/dashboard-shell-close') %>

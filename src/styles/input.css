@@ -707,6 +707,347 @@
   footer.creator-site-footer[data-creator-theme="light"] {
     @apply text-stone-400;
   }
+
+  .settings-layout {
+    @apply grid gap-6 xl:grid-cols-[minmax(240px,280px)_minmax(0,1fr)] xl:items-start;
+  }
+
+  .settings-preview {
+    @apply card-static overflow-hidden p-0 xl:sticky xl:top-24;
+  }
+
+  .settings-preview-banner {
+    @apply h-20 bg-gradient-to-br from-brand-beer/30 via-brand-coffee/20 to-transparent;
+  }
+
+  .settings-section {
+    @apply card-static space-y-4;
+  }
+
+  .settings-section-head {
+    @apply flex items-start gap-3 border-b border-app-line pb-4;
+  }
+
+  .settings-section-icon {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-beer/10 text-lg;
+  }
+
+  .settings-tip-card {
+    @apply rounded-xl border border-app-line bg-app-surface/60 p-4;
+  }
+
+  .settings-save-bar {
+    @apply sticky bottom-4 z-10 rounded-2xl border border-app-line bg-app-elevated/95 p-4 shadow-xl shadow-black/10 backdrop-blur-md;
+  }
+
+  .upload-card {
+    @apply settings-tip-card flex flex-col gap-3 p-4;
+  }
+
+  .upload-card-head {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .upload-card-badge {
+    @apply shrink-0 rounded-full bg-brand-beer/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent;
+  }
+
+  .upload-dropzone {
+    @apply relative flex min-h-[140px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-app-line bg-app-surface/50 p-3 transition-all duration-200 hover:border-brand-beer/35 hover:bg-app-surface;
+  }
+
+  .upload-dropzone-active {
+    @apply border-brand-beer/60 bg-brand-beer/5 ring-2 ring-brand-beer/20;
+  }
+
+  .upload-dropzone-has-file {
+    @apply border-solid border-app-line bg-app-surface;
+  }
+
+  .upload-dropzone-empty {
+    @apply pointer-events-none text-center;
+  }
+
+  .upload-dropzone-icon {
+    @apply text-3xl;
+  }
+
+  .upload-dropzone-overlay {
+    @apply absolute inset-0 flex items-center justify-center bg-brand-beer/10 backdrop-blur-[1px];
+  }
+
+  .upload-preview {
+    @apply max-h-36 w-full object-cover;
+  }
+
+  .upload-preview-avatar {
+    @apply size-28 rounded-full border-4 border-app-elevated object-cover shadow-md;
+  }
+
+  .upload-preview-cover {
+    @apply h-28 rounded-lg;
+  }
+
+  .upload-meta {
+    @apply flex items-center gap-2 rounded-lg border border-app-line bg-app-surface/60 px-3 py-2;
+  }
+
+  .upload-hint {
+    @apply -mt-1;
+  }
+
+  .posts-layout {
+    @apply grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)] xl:items-start;
+  }
+
+  .post-compose {
+    @apply card-static overflow-hidden p-0;
+  }
+
+  .post-compose-head {
+    @apply border-b border-app-line px-5 py-4 sm:px-6;
+  }
+
+  .post-toolbar {
+    @apply flex flex-wrap items-center gap-1 border-b border-app-line bg-app-surface/50 px-3 py-2;
+  }
+
+  .post-toolbar-group {
+    @apply flex flex-wrap items-center gap-1;
+  }
+
+  .post-toolbar-btn-wide {
+    @apply min-w-[2.25rem] gap-0.5 px-2;
+  }
+
+  .post-toolbar-menu {
+    @apply absolute left-0 top-[calc(100%+0.35rem)] z-20 min-w-[9rem] overflow-hidden rounded-xl border border-app-line bg-app-elevated py-1 shadow-xl shadow-black/20;
+  }
+
+  .post-toolbar-menu-item {
+    @apply block w-full px-3 py-2 text-left text-sm text-app-text transition hover:bg-app-surface;
+  }
+
+  .post-toolbar-menu-item-active {
+    @apply bg-brand-beer/10 text-accent;
+  }
+
+  .post-toolbar-hint {
+    @apply border-b border-app-line px-5 py-2 text-xs text-muted sm:px-6;
+  }
+
+  .post-toolbar-hint code {
+    @apply rounded bg-app-surface px-1 py-0.5 font-mono text-[11px] text-app-text;
+  }
+
+  .post-toolbar-btn {
+    @apply inline-flex size-9 items-center justify-center rounded-lg text-sm font-semibold text-muted transition hover:bg-app-elevated hover:text-app-text;
+  }
+
+  .post-tab {
+    @apply rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition hover:text-app-text;
+  }
+
+  .post-tab-active {
+    @apply bg-brand-beer/15 text-accent;
+  }
+
+  .post-toolbar-btn-active {
+    @apply bg-brand-beer/15 text-accent ring-1 ring-brand-beer/25;
+  }
+
+  .post-toolbar-divider {
+    @apply mx-1 h-6 w-px bg-stone-400/30;
+  }
+
+  [data-theme="dark"] .post-toolbar-divider {
+    @apply bg-white/10;
+  }
+
+  .post-prosemirror {
+    @apply border-t border-app-line bg-app-bg/30;
+  }
+
+  .post-prosemirror .ProseMirror {
+    @apply min-h-[260px] px-5 py-4 text-sm leading-relaxed text-app-text outline-none sm:px-6;
+  }
+
+  .post-prosemirror .ProseMirror > * + * {
+    @apply mt-3;
+  }
+
+  .post-prosemirror .ProseMirror h1 {
+    @apply font-display text-xl font-bold text-app-text;
+  }
+
+  .post-prosemirror .ProseMirror h2 {
+    @apply font-display text-lg font-semibold text-app-text;
+  }
+
+  .post-prosemirror .ProseMirror h3 {
+    @apply font-semibold text-app-text;
+  }
+
+  .post-prosemirror .ProseMirror blockquote {
+    @apply border-l-2 border-brand-beer/40 pl-4 text-muted;
+  }
+
+  .post-prosemirror .ProseMirror pre {
+    @apply overflow-x-auto rounded-xl border border-app-line bg-app-bg/60 px-4 py-3 font-mono text-xs leading-relaxed text-app-text;
+  }
+
+  .post-prosemirror .ProseMirror code {
+    @apply rounded bg-app-surface px-1.5 py-0.5 font-mono text-[0.85em] text-accent;
+  }
+
+  .post-prosemirror .ProseMirror pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+
+  .post-prosemirror .ProseMirror hr {
+    @apply my-4 border-0 border-t border-app-line;
+  }
+
+  .post-prosemirror .ProseMirror s {
+    @apply text-muted;
+  }
+
+  .post-prosemirror .ProseMirror ul {
+    @apply list-disc space-y-1 pl-5;
+  }
+
+  .post-prosemirror .ProseMirror ol {
+    @apply list-decimal space-y-1 pl-5;
+  }
+
+  .post-prosemirror .ProseMirror.is-doc-empty::before {
+    content: attr(data-placeholder);
+    @apply pointer-events-none float-left h-0 text-muted;
+  }
+
+  .post-prosemirror .post-editor-link {
+    @apply text-accent underline decoration-brand-beer/40 underline-offset-2;
+  }
+
+  .post-content h1 {
+    @apply font-display text-lg font-bold;
+  }
+
+  .post-content h2 {
+    @apply font-display text-base font-semibold;
+  }
+
+  .post-content h3 {
+    @apply font-semibold;
+  }
+
+  .post-content blockquote {
+    @apply border-l-2 border-brand-beer/30 pl-3 text-muted;
+  }
+
+  .post-content pre {
+    @apply overflow-x-auto rounded-lg bg-app-surface px-3 py-2 font-mono text-xs;
+  }
+
+  .post-content code {
+    @apply rounded bg-app-surface px-1 font-mono text-xs text-accent;
+  }
+
+  .post-content hr {
+    @apply my-3 border-0 border-t border-app-line;
+  }
+
+  .post-content ul {
+    @apply list-disc pl-5;
+  }
+
+  .post-content ol {
+    @apply list-decimal pl-5;
+  }
+
+  .post-content a {
+    @apply text-accent underline underline-offset-2;
+  }
+
+  .post-editor-area {
+    @apply min-h-[220px] w-full resize-y border-0 bg-transparent px-5 py-4 text-sm leading-relaxed text-app-text outline-none placeholder:text-muted sm:px-6;
+  }
+
+  .post-preview {
+    @apply min-h-[220px] px-5 py-4 text-sm leading-relaxed text-app-text sm:px-6;
+  }
+
+  .post-md-h1 {
+    @apply mb-2 mt-1 font-display text-xl font-bold;
+  }
+
+  .post-md-h2 {
+    @apply mb-2 mt-1 font-display text-lg font-semibold;
+  }
+
+  .post-md-h3 {
+    @apply mb-1 mt-1 font-semibold;
+  }
+
+  .post-visibility-pill {
+    @apply inline-flex items-center gap-2 rounded-xl border border-app-line px-3 py-2 text-sm font-medium text-muted transition hover:border-brand-beer/30 hover:text-app-text;
+  }
+
+  .post-visibility-pill-active {
+    @apply border-brand-beer/40 bg-brand-beer/10 text-accent;
+  }
+
+  .post-switch {
+    @apply relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border border-app-line bg-app-surface transition;
+  }
+
+  .post-switch-knob {
+    @apply ml-0.5 size-5 rounded-full bg-stone-400 transition;
+  }
+
+  [data-theme="dark"] .post-switch-knob {
+    @apply bg-stone-500;
+  }
+
+  .post-switch-on {
+    @apply border-brand-beer/40 bg-brand-beer/20;
+  }
+
+  .post-switch-on .post-switch-knob {
+    @apply translate-x-5 bg-brand-beer;
+  }
+
+  .post-list {
+    @apply space-y-3;
+  }
+
+  .post-list-item {
+    @apply card-static p-4 transition hover:border-brand-beer/20;
+  }
+
+  .post-badge {
+    @apply inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide;
+  }
+
+  .post-badge-public {
+    @apply bg-emerald-500/15 text-emerald-600;
+  }
+
+  [data-theme="dark"] .post-badge-public {
+    @apply text-emerald-400;
+  }
+
+  .post-badge-members {
+    @apply bg-brand-beer/15 text-accent;
+  }
+
+  .post-badge-draft {
+    @apply bg-app-surface text-muted ring-1 ring-stone-400/30;
+  }
+
+  [data-theme="dark"] .post-badge-draft {
+    @apply ring-white/10;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

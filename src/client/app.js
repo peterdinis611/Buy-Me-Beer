@@ -1,4 +1,5 @@
 import Alpine from "alpinejs"
+import { createRichPostEditor } from "./post-prosemirror.js"
 
 const PRODUCT_EMOJI = {
   coffee: "☕",
@@ -273,12 +274,15 @@ function buildSupportCheckout(config) {
 
 Alpine.data("settingsForm", (initial) => ({
   bio: initial.bio || "",
+  displayName: initial.displayName || "",
+  handle: initial.handle || "",
+  avatarUrl: initial.avatarUrl || "",
   coffeePriceEuros: initial.coffeePriceEuros ?? 5,
   beerPriceEuros: initial.beerPriceEuros ?? 8,
   goalEuros: initial.goalEuros ?? 0,
   primaryColor: initial.primaryColor || "#F5A623",
   get bioRemaining() {
-    return 500 - this.bio.length
+    return 500 - (this.bio?.length ?? 0)
   },
   coffeePreview() {
     return formatMoney(Math.round(this.coffeePriceEuros * 100))
@@ -288,6 +292,165 @@ Alpine.data("settingsForm", (initial) => ({
   },
   goalPreview() {
     return this.goalEuros > 0 ? formatMoney(Math.round(this.goalEuros * 100)) : "Off"
+  },
+  onColorPick(event) {
+    this.primaryColor = event.target.value.toUpperCase()
+  },
+}))
+
+Alpine.data("imageUploadField", (config) => ({
+  variant: config.variant || "avatar",
+  hint: config.hint || "JPEG, PNG, WebP, GIF · max 5 MB",
+  preview: config.currentUrl || "",
+  fileName: "",
+  fileSize: "",
+  dragging: false,
+  objectUrl: null,
+
+  get hasSelection() {
+    return Boolean(this.fileName)
+  },
+
+  get canSubmit() {
+    return this.hasSelection
+  },
+
+  pick() {
+    this.$refs.fileInput?.click()
+  },
+
+  applyFile(file) {
+    if (!file) return
+    if (!file.type.startsWith("image/")) return
+
+    if (this.objectUrl) URL.revokeObjectURL(this.objectUrl)
+    this.objectUrl = URL.createObjectURL(file)
+    this.preview = this.objectUrl
+    this.fileName = file.name
+    this.fileSize = this.formatSize(file.size)
+
+    const dt = new DataTransfer()
+    dt.items.add(file)
+    this.$refs.fileInput.files = dt.files
+  },
+
+  onFileChange(event) {
+    this.applyFile(event.target.files?.[0])
+  },
+
+  onDrop(event) {
+    this.dragging = false
+    this.applyFile(event.dataTransfer?.files?.[0])
+  },
+
+  clear() {
+    if (this.objectUrl) URL.revokeObjectURL(this.objectUrl)
+    this.objectUrl = null
+    this.preview = config.currentUrl || ""
+    this.fileName = ""
+    this.fileSize = ""
+    if (this.$refs.fileInput) this.$refs.fileInput.value = ""
+  },
+
+  formatSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  },
+}))
+
+Alpine.data("postEditor", () => ({
+  title: "",
+  body: "",
+  textLength: 0,
+  visibility: "public",
+  published: true,
+  editor: null,
+  active: {
+    bold: false,
+    italic: false,
+    strike: false,
+    code: false,
+    link: false,
+    heading1: false,
+    heading2: false,
+    heading3: false,
+    paragraph: false,
+    codeBlock: false,
+    blockquote: false,
+    bulletList: false,
+    orderedList: false,
+  },
+  headingMenuOpen: false,
+
+  init() {
+    this.$nextTick(() => {
+      const mount = this.$refs.editorMount
+      if (!mount) return
+
+      this.editor = createRichPostEditor(mount, {
+        onUpdate: ({ html, textLength }) => {
+          this.body = html
+          this.textLength = textLength
+          this.refreshActive()
+        },
+      })
+
+      this.$el.addEventListener("submit", () => {
+        if (this.editor) this.body = this.editor.getHtml()
+      })
+    })
+  },
+
+  get titleRemaining() {
+    return 120 - this.title.length
+  },
+
+  get bodyRemaining() {
+    return 5000 - this.textLength
+  },
+
+  refreshActive() {
+    if (!this.editor) return
+    this.active = {
+      bold: this.editor.isActive("bold"),
+      italic: this.editor.isActive("italic"),
+      strike: this.editor.isActive("strike"),
+      code: this.editor.isActive("code"),
+      link: this.editor.isActive("link"),
+      heading1: this.editor.isActive("heading1"),
+      heading2: this.editor.isActive("heading2"),
+      heading3: this.editor.isActive("heading3"),
+      paragraph: this.editor.isActive("paragraph"),
+      codeBlock: this.editor.isActive("codeBlock"),
+      blockquote: this.editor.isActive("blockquote"),
+      bulletList: this.editor.isActive("bulletList"),
+      orderedList: this.editor.isActive("orderedList"),
+    }
+  },
+
+  cmd(method) {
+    if (!this.editor || typeof this.editor[method] !== "function") return
+    this.editor[method]()
+    this.refreshActive()
+  },
+
+  headingCmd(method) {
+    this.headingMenuOpen = false
+    this.cmd(method)
+  },
+}))
+
+Alpine.data("postDelete", () => ({
+  confirmId: "",
+  ask(id) {
+    this.confirmId = id
+  },
+  cancel() {
+    this.confirmId = ""
+  },
+  submit(id) {
+    document.getElementById(`delete-post-${id}`)?.submit()
   },
 }))
 

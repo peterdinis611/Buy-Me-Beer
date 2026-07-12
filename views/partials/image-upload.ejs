@@ -1,0 +1,77 @@
+<form
+  action="<%= action %>"
+  method="post"
+  enctype="multipart/form-data"
+  class="upload-card"
+  data-upload-variant="<%= variant %>"
+  data-upload-hint="<%= typeof hint !== 'undefined' && hint ? hint : 'JPEG, PNG, WebP, GIF · max 5 MB' %>"
+  data-current-url="<%= currentUrl || '' %>"
+  x-data="imageUploadField({ variant: $el.dataset.uploadVariant, hint: $el.dataset.uploadHint, currentUrl: $el.dataset.currentUrl })"
+  @dragover.prevent="dragging = true"
+  @dragleave.prevent="dragging = false"
+  @drop.prevent="onDrop($event)"
+>
+  <div class="upload-card-head">
+    <div>
+      <p class="font-medium text-app-text"><%= title %></p>
+      <p class="mt-0.5 text-xs text-muted"><%= typeof description !== 'undefined' ? description : 'Drag & drop or click to choose a file.' %></p>
+    </div>
+    <span class="upload-card-badge"><%= variant === 'cover' ? 'Wide' : 'Square' %></span>
+  </div>
+
+  <div
+    role="button"
+    tabindex="0"
+    class="upload-dropzone"
+    :class="{
+      'upload-dropzone-active': dragging,
+      'upload-dropzone-has-file': hasSelection
+    }"
+    @click="pick()"
+    @keydown.enter.prevent="pick()"
+    @keydown.space.prevent="pick()"
+  >
+    <input
+      x-ref="fileInput"
+      type="file"
+      name="<%= fieldName %>"
+      accept="image/jpeg,image/png,image/webp,image/gif"
+      class="sr-only"
+      required
+      @change="onFileChange($event)"
+    />
+
+    <template x-if="preview">
+      <img
+        :src="preview"
+        alt=""
+        class="upload-preview"
+        :class="variant === 'cover' ? 'upload-preview-cover' : 'upload-preview-avatar'"
+      />
+    </template>
+
+    <div class="upload-dropzone-empty" x-show="!preview">
+      <span class="upload-dropzone-icon" aria-hidden="true"><%= variant === 'cover' ? '🖼️' : '📷' %></span>
+      <p class="mt-2 text-sm font-medium text-app-text">Drop image here</p>
+      <p class="mt-1 text-xs text-muted">or click to browse</p>
+    </div>
+
+    <div class="upload-dropzone-overlay" x-show="dragging" x-cloak>
+      <p class="text-sm font-semibold text-accent">Release to select</p>
+    </div>
+  </div>
+
+  <div class="upload-meta" x-show="hasSelection" x-cloak>
+    <div class="min-w-0 flex-1">
+      <p class="truncate text-sm font-medium text-app-text" x-text="fileName"></p>
+      <p class="text-xs text-muted" x-text="fileSize"></p>
+    </div>
+    <button type="button" class="btn-ghost px-2 py-1 text-xs" @click.stop="clear()">Clear</button>
+  </div>
+
+  <p class="upload-hint text-xs text-muted" x-show="!hasSelection" x-text="hint"></p>
+
+  <button type="submit" class="btn-primary w-full py-2.5 text-sm" :disabled="!canSubmit" :class="!canSubmit && 'opacity-50'">
+    <%= submitLabel %>
+  </button>
+</form>

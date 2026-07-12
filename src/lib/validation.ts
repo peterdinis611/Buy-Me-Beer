@@ -159,7 +159,7 @@ export const shopPurchaseSchema = z.object({
 export const postSchema = z.object({
   id: z.string().optional(),
   title: z.string().min(1).max(120),
-  body: z.string().max(5000).optional(),
+  body: z.string().max(50000).optional(),
   visibility: z.enum(["public", "members"]).default("public"),
   published: z.union([z.boolean(), z.string(), z.number()]).optional(),
 })
