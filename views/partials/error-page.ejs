@@ -1,0 +1,16 @@
+<div class="error-page mx-auto flex min-h-[55vh] max-w-lg flex-col items-center justify-center px-4 py-16 text-center">
+  <p class="error-page-code font-display font-bold" aria-hidden="true"><%= statusCode %></p>
+  <div class="error-page-icon animate-float" aria-hidden="true"><%= emoji %></div>
+  <h1 class="page-title mt-2"><%= heading %></h1>
+  <p class="page-subtitle mt-3 max-w-md"><%= message %></p>
+  <div class="mt-8 flex flex-wrap justify-center gap-3">
+    <a href="<%= primaryHref %>" class="btn-primary"><%= primaryLabel %></a>
+    <% if (typeof secondaryHref !== 'undefined' && secondaryHref) { %>
+      <% if (secondaryHref === 'back') { %>
+        <button type="button" class="btn-secondary" onclick="history.back()"><%= secondaryLabel %></button>
+      <% } else { %>
+        <a href="<%= secondaryHref %>" class="btn-secondary"><%= secondaryLabel %></a>
+      <% } %>
+    <% } %>
+  </div>
+</div>

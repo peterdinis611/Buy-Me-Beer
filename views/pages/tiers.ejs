@@ -14,7 +14,7 @@
           <div>
             <p class="font-semibold"><%= tier.name %></p>
             <p class="text-brand-beer"><%= formatMoney(tier.price) %><%= tier.billingInterval === 'month' ? '/mo' : '' %></p>
-            <% if (tier.description) { %><p class="text-sm text-white/50"><%= tier.description %></p><% } %>
+            <% if (tier.description) { %><p class="text-sm text-muted"><%= tier.description %></p><% } %>
           </div>
           <button type="button" @click='ask("<%= tier.id %>", <%- JSON.stringify(tier.name) %>)' class="btn-ghost text-red-400 text-xs">Delete</button>
           <form id="delete-tier-<%= tier.id %>" action="/dashboard/tiers/<%= tier.id %>/delete" method="post" class="hidden"></form>
@@ -47,7 +47,7 @@
       class="card-static max-w-sm w-full"
     >
       <h2 class="font-semibold">Delete tier?</h2>
-      <p class="mt-2 text-sm text-white/60">Remove <span x-text="tierName" class="font-medium text-white"></span> from your page?</p>
+      <p class="mt-2 text-sm text-muted">Remove <span x-text="tierName" class="font-medium text-app-text"></span> from your page?</p>
       <div class="mt-6 flex gap-3">
         <button type="button" @click="cancel()" class="btn-secondary flex-1">Cancel</button>
         <button type="button" @click="submit()" class="btn-primary flex-1 !bg-red-600 !shadow-red-600/25">Delete</button>
@@ -71,7 +71,7 @@
         <option value="one_time">One-time payment</option>
         <option value="month">Monthly subscription</option>
       </select>
-      <p class="mt-1 text-xs text-white/40">Monthly requires Stripe in production.</p>
+      <p class="mt-1 text-xs text-muted">Monthly requires Stripe in production.</p>
     </div>
     <div>
       <label class="label" for="description">Description</label>

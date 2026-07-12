@@ -49,7 +49,21 @@ export function createApp() {
   app.use(pageRoutes)
 
   app.use((_req, res) => {
-    res.status(404).render("pages/404", { title: "Not found" })
+    res.status(404).render("pages/not-found", { title: "Not found" })
+  })
+
+  app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error(err)
+    if (res.headersSent) return
+
+    const isDev = process.env.NODE_ENV !== "production"
+    res.status(500).render("pages/error", {
+      title: "Error",
+      message:
+        isDev && err instanceof Error
+          ? err.message
+          : "We're sorry — an unexpected error occurred. Please try again in a moment.",
+    })
   })
 
   return app

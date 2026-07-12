@@ -8,7 +8,7 @@
   </header>
 
   <% if (items.length === 0) { %>
-    <div class="card-static py-12 text-center text-white/50">No commission requests yet.</div>
+    <div class="card-static py-12 text-center text-muted">No commission requests yet.</div>
   <% } else { %>
     <div class="space-y-4">
       <% items.forEach(function(item) { %>
@@ -16,8 +16,8 @@
           <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p class="font-semibold"><%= item.title %></p>
-              <p class="mt-1 text-sm text-white/50"><%= item.clientName %><% if (item.clientEmail) { %> · <%= item.clientEmail %><% } %></p>
-              <% if (item.description) { %><p class="mt-3 text-sm text-white/70"><%= item.description %></p><% } %>
+              <p class="mt-1 text-sm text-muted"><%= item.clientName %><% if (item.clientEmail) { %> · <%= item.clientEmail %><% } %></p>
+              <% if (item.description) { %><p class="mt-3 text-sm text-app-text"><%= item.description %></p><% } %>
               <p class="mt-3 text-lg font-bold text-brand-beer"><%= formatMoney(item.price) %></p>
             </div>
             <div class="flex flex-col gap-2 sm:items-end">

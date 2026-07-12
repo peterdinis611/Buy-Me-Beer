@@ -1,0 +1,15 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<%- include('../partials/error-page', {
+  statusCode: typeof statusCode !== 'undefined' ? statusCode : 500,
+  emoji: '⚠️',
+  heading: typeof heading !== 'undefined' ? heading : 'Something went wrong',
+  message: typeof message !== 'undefined' ? message : "We're sorry — an unexpected error occurred. Please try again in a moment.",
+  primaryHref: '/',
+  primaryLabel: 'Go home',
+  secondaryHref: 'back',
+  secondaryLabel: 'Go back'
+}) %>
+
+<%- include('../partials/footer') %>

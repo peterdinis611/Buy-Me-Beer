@@ -14,8 +14,8 @@
           <div>
             <p class="font-semibold"><%= item.name %></p>
             <p class="text-brand-beer"><%= formatMoney(item.price) %></p>
-            <% if (item.description) { %><p class="mt-1 text-sm text-white/50"><%= item.description %></p><% } %>
-            <p class="mt-1 truncate text-xs text-white/35"><%= item.src %></p>
+            <% if (item.description) { %><p class="mt-1 text-sm text-muted"><%= item.description %></p><% } %>
+            <p class="mt-1 truncate text-xs text-muted"><%= item.src %></p>
           </div>
           <form action="/dashboard/shop/<%= item.id %>/delete" method="post">
             <button type="submit" class="btn-ghost text-xs text-red-400">Delete</button>

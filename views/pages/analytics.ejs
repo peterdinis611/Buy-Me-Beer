@@ -19,17 +19,17 @@
 
   <div class="grid gap-4 sm:grid-cols-2">
     <div class="stat-hero stat-hero-primary">
-      <p class="text-sm text-white/50">Period total</p>
-      <p class="mt-2 font-display text-3xl font-bold text-brand-beer"><%= formatMoney(monthTotal) %></p>
+      <p class="stat-hero-label">Period total</p>
+      <p class="mt-2 font-display text-3xl font-bold text-accent"><%= formatMoney(monthTotal) %></p>
     </div>
     <div class="stat-hero">
-      <p class="text-sm text-white/50">Supports</p>
-      <p class="mt-2 font-display text-3xl font-bold"><%= monthCount %></p>
+      <p class="stat-hero-label">Supports</p>
+      <p class="mt-2 font-display text-3xl font-bold text-app-text"><%= monthCount %></p>
     </div>
   </div>
 
   <div class="card-static mt-6">
-    <p class="font-medium">Daily revenue</p>
+    <p class="font-medium text-app-text">Daily revenue</p>
     <div class="mt-6 flex h-52 items-end gap-1 overflow-x-auto pb-2">
       <template x-for="bar in chart" :key="bar.date">
         <div class="flex min-w-[12px] flex-1 flex-col items-center justify-end gap-2">
@@ -38,7 +38,7 @@
             :style="`height:${barHeight(bar.total)}%`"
             :title="bar.date"
           ></div>
-          <span class="hidden text-[10px] text-white/30 sm:block" x-text="bar.date.slice(5)"></span>
+          <span class="hidden text-[10px] text-muted sm:block" x-text="bar.date.slice(5)"></span>
         </div>
       </template>
     </div>

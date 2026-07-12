@@ -1,0 +1,15 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<%- include('../partials/error-page', {
+  statusCode: 404,
+  emoji: '🔍',
+  heading: 'Page not found',
+  message: typeof message !== 'undefined' ? message : "The page you're looking for doesn't exist or was moved.",
+  primaryHref: '/',
+  primaryLabel: 'Go home',
+  secondaryHref: '/explore',
+  secondaryLabel: 'Explore creators'
+}) %>
+
+<%- include('../partials/footer') %>

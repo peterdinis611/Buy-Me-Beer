@@ -1,331 +1,354 @@
 <%
   const isLight = creator.theme === 'minimal';
+  const creatorTheme = isLight ? 'light' : 'dark';
   const bodyClass = creator.theme === 'dark'
     ? 'min-h-screen bg-gradient-to-b from-stone-900 to-[#140e0a] font-body text-white antialiased flex flex-col'
     : creator.theme === 'minimal'
       ? 'min-h-screen bg-[#f5f5f4] font-body text-gray-900 antialiased flex flex-col'
       : 'min-h-screen bg-gradient-to-b from-[#1c1917] to-[#140e0a] font-body text-white antialiased flex flex-col';
-  const border = isLight ? 'border-gray-200' : 'border-white/10';
-  const surface = isLight ? 'border-gray-200 bg-white' : 'border-white/10 bg-white/5';
-  const muted = isLight ? 'text-gray-500' : 'text-white/50';
-  const text = isLight ? 'text-gray-600' : 'text-white/70';
-  const accent = isLight ? 'text-amber-700' : 'text-brand-beer';
-  const inputClass = isLight ? '!bg-gray-50 !text-gray-900 !border-gray-200' : '';
+  const hasCover = !!creator.coverImageUrl;
+  const hasPosts = typeof posts !== 'undefined' && posts.length > 0;
+  const hasLeaderboard = typeof leaderboard !== 'undefined' && leaderboard.length > 0;
+  const hasWall = typeof publicMessages !== 'undefined' && publicMessages.length > 0;
+  const hasCommunity = hasPosts || hasLeaderboard || hasWall;
+  const hasTiers = typeof tiers !== 'undefined' && tiers.length > 0;
 %>
 
 <%- include('../partials/head', { title, bodyClass, ogDescription, profileUrl, ogImage: creator.avatarUrl, inlineStyle: typeof brandingStyle !== 'undefined' ? brandingStyle : '' }) %>
 
-<% if (creator.coverImageUrl) { %>
-  <div class="h-40 w-full overflow-hidden sm:h-52">
-    <img src="<%= creator.coverImageUrl %>" alt="" class="size-full object-cover" />
-  </div>
-<% } %>
-
-<header class="border-b <%= isLight ? 'border-gray-200 bg-white/80' : 'border-white/10 bg-black/20' %> backdrop-blur-md">
-  <div class="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
-    <a href="/" class="text-sm font-medium <%= muted %> hover:opacity-80">🍺 Buy Me Beer</a>
+<header class="creator-site-header" data-creator-theme="<%= creatorTheme %>">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+    <a href="/" class="text-sm font-medium creator-muted hover:opacity-80">🍺 Buy Me Beer</a>
     <% if (sessionUser && sessionUser.handle === creator.handle) { %>
-      <a href="/dashboard" class="text-sm <%= accent %>">Dashboard</a>
+      <a href="/dashboard" class="text-sm creator-accent">Dashboard</a>
     <% } %>
   </div>
 </header>
 
 <%- include('../partials/flash') %>
 
+<script type="application/json" id="creator-support-config"><%- JSON.stringify(supportConfig) %></script>
+
 <div
-  class="mx-auto w-full max-w-lg flex-1 px-4 py-10"
-  x-data="supportCheckout(<%- JSON.stringify(supportConfig) %>)"
+  class="creator-page"
+  data-creator-theme="<%= creatorTheme %>"
+  x-data="creatorPage(JSON.parse(document.getElementById('creator-support-config').textContent))"
 >
-  <div class="animate-fade-in-up text-center">
-    <img
-      src="<%= creator.avatarUrl %>"
-      alt="<%= creator.displayName %> profile photo"
-      class="avatar-ring mx-auto size-28 rounded-full border-4 <%= isLight ? 'border-white shadow-xl' : 'border-white/20' %> object-cover animate-scale-in"
-      onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=<%= creator.handle %>'"
-    />
-    <h1 class="animate-fade-in-up anim-delay-100 mt-6 font-display text-3xl font-bold"><%= creator.displayName %></h1>
-    <p class="mt-1 text-sm <%= muted %>">@<%= creator.handle %></p>
-    <% if (creator.bio) { %>
-      <p class="mx-auto mt-4 max-w-sm <%= text %>"><%= creator.bio %></p>
-    <% } %>
-
-    <% if (creator.website || creator.twitter || creator.github) { %>
-      <div class="mt-4 flex flex-wrap justify-center gap-3 text-sm">
-        <% if (creator.website) { %><a href="<%= creator.website %>" target="_blank" rel="noopener" class="<%= accent %> hover:underline">Website</a><% } %>
-        <% if (creator.twitter) { %><a href="https://twitter.com/<%= creator.twitter %>" target="_blank" rel="noopener" class="<%= accent %> hover:underline">@<%= creator.twitter %></a><% } %>
-        <% if (creator.github) { %><a href="https://github.com/<%= creator.github %>" target="_blank" rel="noopener" class="<%= accent %> hover:underline">GitHub</a><% } %>
-      </div>
-    <% } %>
-
-    <% if (creator.goalAmount > 0) { %>
-      <div class="mx-auto mt-6 max-w-sm text-left">
-        <div class="flex justify-between text-xs <%= muted %>">
-          <span><%= creator.goalTitle || 'Goal' %></span>
-          <span><%= formatMoney(stats.total) %> / <%= formatMoney(creator.goalAmount) %></span>
+  <div class="creator-layout">
+    <aside class="creator-sidebar animate-fade-in-up creator-surface overflow-hidden p-0 text-left lg:sticky lg:top-4">
+      <% if (hasCover) { %>
+        <img src="<%= creator.coverImageUrl %>" alt="" class="h-24 w-full object-cover sm:h-28" />
+      <% } %>
+      <div class="creator-sidebar-body">
+        <div class="creator-profile-row">
+          <img
+            src="<%= creator.avatarUrl %>"
+            alt="<%= creator.displayName %> profile photo"
+            class="avatar-ring size-16 shrink-0 rounded-full border-2 <%= isLight ? 'border-white shadow-md' : 'border-white/20' %> object-cover"
+            onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=<%= creator.handle %>'"
+          />
+          <div class="min-w-0">
+            <h1 class="creator-heading truncate text-lg leading-tight sm:text-xl"><%= creator.displayName %></h1>
+            <p class="text-xs creator-muted">@<%= creator.handle %></p>
+          </div>
         </div>
-        <div class="mt-1.5 h-2 overflow-hidden rounded-full <%= isLight ? 'bg-gray-200' : 'bg-white/10' %>">
-          <div class="h-full rounded-full bg-brand-beer transition-all duration-700" style="width: <%= goalProgress %>%"></div>
-        </div>
-      </div>
-    <% } %>
 
-    <% if (stats.count > 0) { %>
-      <p class="mt-4 text-sm <%= isLight ? 'text-gray-400' : 'text-white/35' %>">
-        <%= stats.count %> supporter<%= stats.count === 1 ? '' : 's' %> · <%= formatMoney(stats.total) %> total
-      </p>
-    <% } %>
-  </div>
+        <% if (creator.bio) { %>
+          <p class="creator-text mt-3 line-clamp-3 text-sm leading-relaxed"><%= creator.bio %></p>
+        <% } %>
 
-  <form
-    action="/<%= creator.handle %>/support"
-    method="post"
-    @submit="onSubmit()"
-    class="animate-fade-in-up anim-delay-200 mt-10 space-y-5"
-  >
-    <input type="hidden" name="product" :value="product" />
-    <input type="hidden" name="membershipTierId" :value="membershipTierId" />
+        <% if (creator.website || creator.twitter || creator.github) { %>
+          <div class="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            <% if (creator.website) { %><a href="<%= creator.website %>" target="_blank" rel="noopener" class="creator-accent hover:underline">Website</a><% } %>
+            <% if (creator.twitter) { %><a href="https://twitter.com/<%= creator.twitter %>" target="_blank" rel="noopener" class="creator-accent hover:underline">@<%= creator.twitter %></a><% } %>
+            <% if (creator.github) { %><a href="https://github.com/<%= creator.github %>" target="_blank" rel="noopener" class="creator-accent hover:underline">GitHub</a><% } %>
+          </div>
+        <% } %>
 
-    <div>
-      <p class="mb-3 text-sm font-medium <%= text %>">1. Choose how to support</p>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <button
-          type="button"
-          @click="selectCoffee()"
-          class="card-tip text-left"
-          :class="product === 'coffee' ? 'ring-2 ring-brand-coffee/60 <%= isLight ? 'border-amber-400 bg-amber-50' : 'border-brand-coffee/50 bg-white/10' %>' : '<%= surface %>'"
-        >
-          <span class="text-3xl">☕</span>
-          <p class="mt-2 font-semibold"><%= creator.coffeeLabel %></p>
-          <p class="text-lg font-bold <%= isLight ? 'text-amber-700' : 'text-brand-coffee' %>"><%= formatMoney(creator.coffeePrice) %></p>
-        </button>
-        <button
-          type="button"
-          @click="selectBeer()"
-          class="card-tip text-left"
-          :class="product === 'beer' ? 'ring-2 ring-brand-beer/60 <%= isLight ? 'border-amber-500 bg-amber-50' : 'border-brand-beer/50 bg-white/10' %>' : '<%= surface %>'"
-        >
-          <span class="text-3xl">🍺</span>
-          <p class="mt-2 font-semibold"><%= creator.beerLabel %></p>
-          <p class="text-lg font-bold <%= accent %>"><%= formatMoney(creator.beerPrice) %></p>
-        </button>
-      </div>
-    </div>
-
-    <div class="card-static rounded-2xl border p-5 <%= surface %>">
-      <p class="mb-3 text-sm font-medium <%= text %>">Custom amount (€)</p>
-      <div class="flex gap-2">
-        <input
-          x-model="customAmount"
-          @focus="selectCustom()"
-          class="input flex-1 <%= inputClass %>"
-          type="number"
-          name="customAmount"
-          min="1"
-          max="1000"
-          step="0.5"
-          placeholder="5.00"
-        />
-      </div>
-      <p class="mt-2 text-xs <%= muted %>">Min €1 · Max €1000</p>
-    </div>
-
-    <% if (typeof tiers !== 'undefined' && tiers.length > 0) { %>
-      <div class="space-y-2">
-        <p class="text-sm font-medium <%= text %>">Membership & support tiers</p>
-        <% tiers.forEach(function(tier) { %>
-          <button
-            type="button"
-            @click='selectTier("<%= tier.id %>")'
-            class="card-tip w-full rounded-2xl border p-4 text-left"
-            :class="membershipTierId === '<%= tier.id %>' ? 'ring-2 ring-brand-beer/60 <%= surface %>' : '<%= surface %>'"
-          >
-            <div class="flex items-start justify-between gap-3">
+        <% if (creator.goalAmount > 0 || stats.count > 0) { %>
+          <div class="creator-divider mt-4 space-y-3 border-t pt-4">
+            <% if (creator.goalAmount > 0) { %>
               <div>
-                <p class="font-semibold"><%= tier.name %></p>
-                <% if (tier.description) { %><p class="mt-1 text-sm <%= muted %>"><%= tier.description %></p><% } %>
-                <p class="mt-1 text-xs <%= muted %>"><%= tier.billingInterval === 'month' ? 'Monthly subscription' : 'One-time' %></p>
+                <div class="flex justify-between text-xs creator-muted">
+                  <span class="truncate pr-2"><%= creator.goalTitle || 'Goal' %></span>
+                  <span class="shrink-0"><%= formatMoney(stats.total) %> / <%= formatMoney(creator.goalAmount) %></span>
+                </div>
+                <div class="creator-progress-track mt-1.5 h-1.5 overflow-hidden rounded-full">
+                  <div class="h-full rounded-full bg-brand-beer transition-all duration-700" style="width: <%= goalProgress %>%"></div>
+                </div>
               </div>
-              <span class="shrink-0 font-bold <%= accent %>"><%= tier.billingInterval === 'month' ? formatMoney(tier.price) + '/mo' : formatMoney(tier.price) %> →</span>
-            </div>
-          </button>
-        <% }) %>
-      </div>
-    <% } %>
-
-    <div x-show="hasSelection" x-cloak x-transition class="card-static space-y-4 rounded-2xl border p-5 <%= surface %>">
-      <div class="flex items-center justify-between gap-3 border-b <%= border %> pb-4">
-        <div class="text-left">
-          <p class="text-xs uppercase tracking-wide <%= muted %>">Your selection</p>
-          <p class="font-semibold" x-text="summaryLabel"></p>
-        </div>
-        <p class="text-xl font-bold <%= accent %>" x-text="summaryAmount"></p>
-      </div>
-
-      <div>
-        <p class="mb-3 text-sm font-medium <%= text %>">2. Add a message (optional)</p>
-        <div class="space-y-3">
-          <input x-model="name" class="input <%= inputClass %>" type="text" name="name" placeholder="Your name" />
-          <input x-model="email" class="input <%= inputClass %>" type="email" name="email" placeholder="Email (optional)" />
-          <div>
-            <textarea
-              x-model="message"
-              class="input min-h-[88px] resize-y <%= inputClass %>"
-              name="message"
-              maxlength="280"
-              placeholder="Say something nice…"
-            ></textarea>
-            <p class="mt-1 text-right text-xs <%= muted %>"><span x-text="message.length"></span>/280</p>
+            <% } %>
+            <% if (stats.count > 0) { %>
+              <p class="text-xs creator-muted">
+                <%= stats.count %> supporter<%= stats.count === 1 ? '' : 's' %> · <%= formatMoney(stats.total) %>
+              </p>
+            <% } %>
           </div>
-          <label class="flex cursor-pointer items-center gap-2 text-sm <%= text %>">
-            <input type="hidden" name="isPublic" :value="isPublic ? 'true' : 'false'" />
-            <input type="checkbox" x-model="isPublic" class="size-4 rounded accent-brand-beer" />
-            Show message on supporter wall
-          </label>
-          <div class="mt-4 space-y-3 border-t <%= border %> pt-4">
-            <label class="flex cursor-pointer items-center gap-2 text-sm <%= text %>">
-              <input type="hidden" name="isGift" :value="isGift ? 'true' : 'false'" />
-              <input type="checkbox" x-model="isGift" class="size-4 rounded accent-brand-beer" />
-              Send as a gift 🎁
-            </label>
-            <div x-show="isGift" x-cloak class="space-y-3">
-              <input x-model="giftRecipientName" class="input <%= inputClass %>" type="text" name="giftRecipientName" placeholder="Recipient name" />
-              <textarea x-model="giftMessage" class="input min-h-[72px] resize-y <%= inputClass %>" name="giftMessage" maxlength="280" placeholder="Gift message (optional)"></textarea>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <button
-      type="submit"
-      class="btn-primary w-full py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-50"
-      :disabled="!canSubmit"
-      x-text="submitLabel"
-    ></button>
-
-    <% if (!stripeEnabled) { %>
-    <p class="text-center text-xs <%= muted %>">Demo mode — no real charge</p>
-    <% } else { %>
-    <p class="text-center text-xs <%= muted %>">Secure checkout via Stripe</p>
-    <% } %>
-  </form>
-
-  <% if (typeof posts !== 'undefined' && posts.length > 0) { %>
-    <div id="posts" class="mt-12 animate-fade-in-up">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 class="font-display text-lg font-semibold">Updates</h2>
-        <% if (!canViewMembersPosts) { %>
-          <form action="/<%= creator.handle %>/members/verify" method="post" class="flex flex-wrap gap-2">
-            <input class="input <%= inputClass %> min-w-0 flex-1" type="email" name="email" placeholder="Member email to unlock" required />
-            <button type="submit" class="btn-secondary text-sm">Unlock</button>
-          </form>
-        <% } else if (memberEmail) { %>
-          <p class="text-xs <%= muted %>">Unlocked as <%= memberEmail %></p>
         <% } %>
       </div>
-      <div class="mt-4 space-y-4">
-        <% posts.forEach(function(post) { %>
-          <article class="rounded-2xl border p-5 text-left <%= surface %>">
-            <div class="flex items-start justify-between gap-3">
-              <h3 class="font-semibold"><%= post.title %></h3>
-              <% if (post.visibility === 'members') { %>
-                <span class="shrink-0 rounded-full bg-brand-beer/15 px-2 py-0.5 text-xs <%= accent %>">Members</span>
-              <% } %>
-            </div>
-            <% if (post.visibility === 'members' && !canViewMembersPosts) { %>
-              <p class="mt-3 text-sm <%= muted %>">Members-only content — join a tier and verify your email to read.</p>
-            <% } else { %>
-              <div class="prose-like mt-3 whitespace-pre-wrap text-sm <%= text %>"><%= post.body %></div>
+    </aside>
+
+    <div class="creator-main animate-fade-in-up anim-delay-100">
+      <nav class="creator-tabs" aria-label="Creator page sections">
+        <button
+          type="button"
+          class="creator-tab"
+          :class="tab === 'support' && 'creator-tab--active'"
+          @click="setTab('support')"
+        >
+          Support
+        </button>
+        <% if (hasCommunity) { %>
+          <button
+            type="button"
+            class="creator-tab"
+            :class="tab === 'community' && 'creator-tab--active'"
+            @click="setTab('community')"
+          >
+            Community
+          </button>
+        <% } %>
+        <button
+          type="button"
+          class="creator-tab"
+          :class="tab === 'commission' && 'creator-tab--active'"
+          @click="setTab('commission')"
+        >
+          Commission
+        </button>
+      </nav>
+
+      <div class="creator-panel-area">
+        <div class="creator-panel-scroll space-y-4" :class="tab !== 'support' && 'hidden'">
+          <form
+            action="/<%= creator.handle %>/support"
+            method="post"
+            @submit="onSubmit()"
+            class="space-y-4"
+          >
+            <input type="hidden" name="product" :value="product" />
+            <input type="hidden" name="membershipTierId" :value="membershipTierId" />
+
+            <section class="creator-panel creator-surface">
+              <p class="creator-text mb-3 text-sm font-medium">Choose amount</p>
+              <div class="creator-tip-grid">
+                <button
+                  type="button"
+                  @click="selectCoffee()"
+                  class="creator-tip creator-tip--coffee"
+                  :class="product === 'coffee' && 'creator-tip--selected'"
+                >
+                  <span class="text-2xl">☕</span>
+                  <p class="mt-1 text-sm font-semibold leading-tight"><%= creator.coffeeLabel %></p>
+                  <p class="mt-0.5 text-base font-bold creator-accent"><%= formatMoney(creator.coffeePrice) %></p>
+                </button>
+                <button
+                  type="button"
+                  @click="selectBeer()"
+                  class="creator-tip"
+                  :class="product === 'beer' && 'creator-tip--selected'"
+                >
+                  <span class="text-2xl">🍺</span>
+                  <p class="mt-1 text-sm font-semibold leading-tight"><%= creator.beerLabel %></p>
+                  <p class="mt-0.5 text-base font-bold creator-accent"><%= formatMoney(creator.beerPrice) %></p>
+                </button>
+                <div class="creator-tip" :class="product === 'custom' && 'creator-tip--selected'">
+                  <p class="text-xs font-medium creator-text">Custom €</p>
+                  <input
+                    x-model="customAmount"
+                    @focus="selectCustom()"
+                    class="creator-input mt-1 px-2 py-1.5 text-sm"
+                    type="number"
+                    name="customAmount"
+                    min="1"
+                    max="1000"
+                    step="0.5"
+                    placeholder="5.00"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <% if (hasTiers) { %>
+              <section class="creator-panel creator-surface">
+                <p class="creator-text mb-2 text-sm font-medium">Membership tiers</p>
+                <div class="space-y-1.5">
+                  <% tiers.forEach(function(tier) { %>
+                    <button
+                      type="button"
+                      @click='selectTier("<%= tier.id %>")'
+                      class="creator-tier-row"
+                      :class="membershipTierId === '<%= tier.id %>' && 'creator-tier-row--selected'"
+                    >
+                      <div class="min-w-0">
+                        <p class="creator-heading truncate text-sm"><%= tier.name %></p>
+                        <p class="truncate text-xs creator-muted"><%= tier.billingInterval === 'month' ? 'Monthly' : 'One-time' %><% if (tier.description) { %> · <%= tier.description %><% } %></p>
+                      </div>
+                      <span class="creator-accent shrink-0 text-sm font-bold"><%= tier.billingInterval === 'month' ? formatMoney(tier.price) + '/mo' : formatMoney(tier.price) %></span>
+                    </button>
+                  <% }) %>
+                </div>
+              </section>
             <% } %>
-            <p class="mt-3 text-xs <%= muted %>"><%= new Date(post.createdAt).toLocaleDateString() %></p>
-          </article>
-        <% }) %>
-      </div>
-    </div>
-  <% } %>
 
-  <% if (typeof leaderboard !== 'undefined' && leaderboard.length > 0) { %>
-    <div class="mt-12 animate-fade-in-up">
-      <h2 class="font-display text-lg font-semibold">Top supporters</h2>
-      <div class="mt-4 space-y-2">
-        <% leaderboard.forEach(function(entry) { %>
-          <div class="flex items-center justify-between rounded-xl border px-4 py-3 <%= surface %>">
-            <div class="flex items-center gap-3">
-              <span class="text-xl"><%= entry.badge || '⭐' %></span>
-              <div>
-                <p class="font-medium"><%= entry.name %></p>
-                <p class="text-xs <%= muted %>"><%= entry.count %> support<%= entry.count === 1 ? '' : 's' %></p>
+            <section x-show="hasSelection" x-cloak x-transition class="creator-panel creator-surface space-y-3">
+              <div class="creator-divider flex items-center justify-between gap-3 border-b pb-3">
+                <div class="min-w-0 text-left">
+                  <p class="text-xs uppercase tracking-wide creator-muted">Selected</p>
+                  <p class="creator-heading truncate text-sm" x-text="summaryLabel"></p>
+                </div>
+                <p class="creator-accent shrink-0 text-lg font-bold" x-text="summaryAmount"></p>
               </div>
-            </div>
-            <p class="font-bold <%= accent %>"><%= formatMoney(entry.total) %></p>
-          </div>
-        <% }) %>
-      </div>
-    </div>
-  <% } %>
+              <div class="grid gap-2 sm:grid-cols-2">
+                <input x-model="name" class="creator-input text-sm" type="text" name="name" placeholder="Your name" />
+                <input x-model="email" class="creator-input text-sm" type="email" name="email" placeholder="Email (optional)" />
+              </div>
+              <textarea
+                x-model="message"
+                class="creator-input min-h-[64px] resize-y text-sm"
+                name="message"
+                maxlength="280"
+                placeholder="Message (optional)…"
+              ></textarea>
+              <div class="flex flex-wrap gap-x-4 gap-y-2 text-xs creator-text">
+                <label class="flex cursor-pointer items-center gap-2">
+                  <input type="hidden" name="isPublic" :value="isPublic ? 'true' : 'false'" />
+                  <input type="checkbox" x-model="isPublic" class="size-3.5 rounded accent-brand-beer" />
+                  Show on wall
+                </label>
+                <label class="flex cursor-pointer items-center gap-2">
+                  <input type="hidden" name="isGift" :value="isGift ? 'true' : 'false'" />
+                  <input type="checkbox" x-model="isGift" class="size-3.5 rounded accent-brand-beer" />
+                  Gift 🎁
+                </label>
+              </div>
+              <div x-show="isGift" x-cloak class="grid gap-2 sm:grid-cols-2">
+                <input x-model="giftRecipientName" class="creator-input text-sm sm:col-span-2" type="text" name="giftRecipientName" placeholder="Recipient name" />
+                <textarea x-model="giftMessage" class="creator-input min-h-[56px] resize-y text-sm sm:col-span-2" name="giftMessage" maxlength="280" placeholder="Gift message"></textarea>
+              </div>
+            </section>
 
-  <div id="commission" class="mt-12 animate-fade-in-up">
-    <h2 class="font-display text-lg font-semibold">Request a commission</h2>
-    <p class="mt-1 text-sm <%= muted %>">Describe your project and budget — the creator will follow up.</p>
-    <form action="/<%= creator.handle %>/commission" method="post" class="card-static mt-4 space-y-3 rounded-2xl border p-5 <%= surface %>">
-      <input class="input <%= inputClass %>" type="text" name="clientName" placeholder="Your name" required />
-      <input class="input <%= inputClass %>" type="email" name="clientEmail" placeholder="Email (optional)" />
-      <input class="input <%= inputClass %>" type="text" name="title" placeholder="Project title" required />
-      <textarea class="input min-h-[88px] resize-y <%= inputClass %>" name="description" placeholder="Describe the work…"></textarea>
-      <div>
-        <label class="text-sm <%= text %>">Budget (€)</label>
-        <input class="input mt-1 <%= inputClass %>" type="number" name="priceEuros" min="5" max="5000" step="1" placeholder="50" required />
-      </div>
-      <button type="submit" class="btn-primary w-full">Submit request</button>
-    </form>
-  </div>
-
-  <% if (typeof shopItems !== 'undefined' && shopItems.length > 0) { %>
-    <div class="mt-12 animate-fade-in-up">
-      <h2 class="font-display text-lg font-semibold">Shop / Extras</h2>
-      <div class="mt-4 space-y-3">
-        <% shopItems.forEach(function(item) { %>
-          <form action="/<%= creator.handle %>/shop/<%= item.id %>" method="post" class="card-static rounded-2xl border p-5 <%= surface %>">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div class="text-left">
-                <p class="font-semibold"><%= item.name %></p>
-                <% if (item.description) { %><p class="mt-1 text-sm <%= muted %>"><%= item.description %></p><% } %>
-                <p class="mt-2 text-lg font-bold <%= accent %>"><%= formatMoney(item.price) %></p>
-              </div>
-              <div class="flex flex-col gap-2 sm:w-48">
-                <input class="input <%= inputClass %>" type="text" name="name" placeholder="Your name" />
-                <input class="input <%= inputClass %>" type="email" name="email" placeholder="Email for download" />
-                <button type="submit" class="btn-primary w-full">Buy now</button>
-              </div>
-            </div>
+            <button
+              type="submit"
+              class="creator-btn-primary"
+              :disabled="!canSubmit"
+              x-text="submitLabel"
+            ></button>
+            <% if (!stripeEnabled) { %>
+              <p class="text-center text-xs creator-muted">Demo mode — no real charge</p>
+            <% } else { %>
+              <p class="text-center text-xs creator-muted">Secure checkout via Stripe</p>
+            <% } %>
           </form>
-        <% }) %>
-      </div>
-    </div>
-  <% } %>
+        </div>
 
-  <% if (typeof publicMessages !== 'undefined' && publicMessages.length > 0) { %>
-    <div class="mt-12 animate-fade-in-up anim-delay-400">
-      <h2 class="text-center font-display text-lg font-semibold">Supporter wall</h2>
-      <div class="mt-4 space-y-3">
-        <% publicMessages.forEach(function(s, i) { %>
-          <div class="rounded-xl border p-4 text-left <%= surface %>" style="animation-delay: <%= i * 60 %>ms">
-            <p class="mt-1 text-sm <%= text %>">
-              <% if (s.isGift && s.giftRecipientName) { %>
-                <%= s.supporterName %> gifted <%= s.giftRecipientName %> · <%= formatMoney(s.amount) %>
-              <% } else { %>
-                <%= s.supporterName %> · <%= formatMoney(s.amount) %>
-              <% } %>
-            </p>
-            <p class="mt-1 text-sm <%= text %>">"<%= s.message %>"</p>
+        <% if (hasCommunity) { %>
+          <div class="creator-panel-scroll space-y-5 hidden" :class="tab === 'community' && '!block'">
+            <% if (hasPosts) { %>
+              <section class="creator-section">
+                <div class="creator-section-head creator-divider border-b">
+                  <h2 class="creator-section-title">Updates</h2>
+                  <% if (!canViewMembersPosts) { %>
+                    <form action="/<%= creator.handle %>/members/verify" method="post" class="flex w-full max-w-xs gap-2">
+                      <input class="creator-input min-w-0 flex-1 text-sm" type="email" name="email" placeholder="Member email" required />
+                      <button type="submit" class="creator-btn-secondary">Unlock</button>
+                    </form>
+                  <% } else if (memberEmail) { %>
+                    <p class="text-xs creator-muted"><%= memberEmail %></p>
+                  <% } %>
+                </div>
+                <div class="space-y-3">
+                  <% posts.forEach(function(post) { %>
+                    <article class="creator-panel creator-surface text-left">
+                      <div class="flex items-start justify-between gap-2">
+                        <h3 class="creator-heading text-sm"><%= post.title %></h3>
+                        <% if (post.visibility === 'members') { %>
+                          <span class="creator-accent shrink-0 rounded-full bg-brand-beer/15 px-2 py-0.5 text-[10px]">Members</span>
+                        <% } %>
+                      </div>
+                      <% if (post.visibility === 'members' && !canViewMembersPosts) { %>
+                        <p class="creator-muted mt-2 text-xs">Members-only — verify email to read.</p>
+                      <% } else { %>
+                        <div class="creator-text prose-like mt-2 line-clamp-4 whitespace-pre-wrap text-sm"><%= post.body %></div>
+                      <% } %>
+                      <p class="creator-muted mt-2 text-[11px]"><%= new Date(post.createdAt).toLocaleDateString() %></p>
+                    </article>
+                  <% }) %>
+                </div>
+              </section>
+            <% } %>
+
+            <% if (hasLeaderboard) { %>
+              <section class="creator-section">
+                <div class="creator-section-head creator-divider border-b">
+                  <h2 class="creator-section-title">Top supporters</h2>
+                </div>
+                <div class="space-y-1.5">
+                  <% leaderboard.forEach(function(entry) { %>
+                    <div class="creator-surface flex items-center justify-between rounded-xl border px-3 py-2 text-sm">
+                      <div class="flex min-w-0 items-center gap-2">
+                        <span><%= entry.badge || '⭐' %></span>
+                        <div class="min-w-0">
+                          <p class="creator-heading truncate text-sm"><%= entry.name %></p>
+                          <p class="creator-muted text-[11px]"><%= entry.count %>×</p>
+                        </div>
+                      </div>
+                      <p class="creator-accent shrink-0 font-bold"><%= formatMoney(entry.total) %></p>
+                    </div>
+                  <% }) %>
+                </div>
+              </section>
+            <% } %>
+
+            <% if (hasWall) { %>
+              <section class="creator-section">
+                <div class="creator-section-head creator-divider border-b">
+                  <h2 class="creator-section-title">Supporter wall</h2>
+                </div>
+                <div class="space-y-2">
+                  <% publicMessages.forEach(function(s) { %>
+                    <div class="creator-panel creator-surface text-left">
+                      <p class="creator-text text-xs">
+                        <% if (s.isGift && s.giftRecipientName) { %>
+                          <%= s.supporterName %> → <%= s.giftRecipientName %> · <%= formatMoney(s.amount) %>
+                        <% } else { %>
+                          <%= s.supporterName %> · <%= formatMoney(s.amount) %>
+                        <% } %>
+                      </p>
+                      <p class="creator-text mt-1 line-clamp-2 text-sm italic">"<%= s.message %>"</p>
+                    </div>
+                  <% }) %>
+                </div>
+              </section>
+            <% } %>
           </div>
-        <% }) %>
+        <% } %>
+
+        <div class="creator-panel-scroll hidden" :class="tab === 'commission' && '!block'">
+          <section class="creator-panel creator-surface">
+            <h2 class="creator-section-title">Request a commission</h2>
+            <p class="creator-muted mt-1 text-xs">Describe your project and budget.</p>
+            <form action="/<%= creator.handle %>/commission" method="post" class="mt-4 space-y-3">
+              <div class="grid gap-2 sm:grid-cols-2">
+                <input class="creator-input text-sm" type="text" name="clientName" placeholder="Your name" required />
+                <input class="creator-input text-sm" type="email" name="clientEmail" placeholder="Email (optional)" />
+              </div>
+              <input class="creator-input text-sm" type="text" name="title" placeholder="Project title" required />
+              <textarea class="creator-input min-h-[80px] resize-y text-sm" name="description" placeholder="Describe the work…"></textarea>
+              <div>
+                <label class="creator-text text-xs">Budget (€)</label>
+                <input class="creator-input mt-1 text-sm" type="number" name="priceEuros" min="5" max="5000" step="1" placeholder="50" required />
+              </div>
+              <button type="submit" class="creator-btn-primary py-2.5">Submit request</button>
+            </form>
+          </section>
+        </div>
       </div>
     </div>
-  <% } %>
+  </div>
 </div>
 
-<footer class="py-6 text-center text-xs <%= isLight ? 'text-gray-400' : 'text-white/25' %>">
+<footer class="creator-site-footer py-4 text-center text-[11px]" data-creator-theme="<%= creatorTheme %>">
   Powered by Buy Me Beer
 </footer>
 

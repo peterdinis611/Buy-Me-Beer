@@ -10,13 +10,13 @@
   <form action="/dashboard/integrations" method="post" class="space-y-6">
     <div class="card-static space-y-4">
       <h2 class="font-semibold">Discord</h2>
-      <p class="text-sm text-white/50">Paste a Discord channel webhook URL. New members trigger a message with their name and tier.</p>
+      <p class="text-sm text-muted">Paste a Discord channel webhook URL. New members trigger a message with their name and tier.</p>
       <input class="input font-mono text-sm" type="url" name="discordWebhookUrl" value="<%= user.discordWebhookUrl %>" placeholder="https://discord.com/api/webhooks/..." />
     </div>
 
     <div class="card-static space-y-4">
       <h2 class="font-semibold">Slack</h2>
-      <p class="text-sm text-white/50">Incoming webhook URL for your Slack workspace.</p>
+      <p class="text-sm text-muted">Incoming webhook URL for your Slack workspace.</p>
       <input class="input font-mono text-sm" type="url" name="slackWebhookUrl" value="<%= user.slackWebhookUrl %>" placeholder="https://hooks.slack.com/services/..." />
     </div>
 

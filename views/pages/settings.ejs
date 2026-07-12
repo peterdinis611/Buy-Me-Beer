@@ -20,12 +20,12 @@
       <div>
         <label class="label" for="handle">Username</label>
         <input class="input" type="text" id="handle" name="handle" value="<%= user.handle %>" required pattern="[a-zA-Z0-9_-]+" />
-        <p class="mt-1.5 text-xs text-white/40">Changing your username breaks old links — update shared URLs after saving.</p>
+        <p class="mt-1.5 text-xs text-muted">Changing your username breaks old links — update shared URLs after saving.</p>
       </div>
       <div>
         <label class="label" for="bio">Bio</label>
         <textarea x-model="bio" class="input min-h-[100px] resize-y" id="bio" name="bio" maxlength="500"></textarea>
-        <p class="mt-1 text-right text-xs text-white/40"><span x-text="bioRemaining"></span> characters left</p>
+        <p class="mt-1 text-right text-xs text-muted"><span x-text="bioRemaining"></span> characters left</p>
       </div>
       <div>
         <label class="label" for="avatarUrl">Avatar URL</label>
@@ -39,7 +39,7 @@
         <label class="label" for="primaryColor">Brand color</label>
         <div class="flex items-center gap-3">
           <input x-model="primaryColor" class="input flex-1 font-mono uppercase" type="text" id="primaryColor" name="primaryColor" pattern="#[0-9A-Fa-f]{6}" value="<%= user.primaryColor || '#F5A623' %>" />
-          <input x-model="primaryColor" type="color" class="size-11 cursor-pointer rounded-lg border border-white/10 bg-transparent" />
+          <input x-model="primaryColor" type="color" class="size-11 cursor-pointer rounded-lg border border-app-line bg-transparent" />
         </div>
       </div>
       <div>
@@ -49,7 +49,7 @@
           <option value="dark" <%= user.theme === 'dark' ? 'selected' : '' %>>Dark — minimal black</option>
           <option value="minimal" <%= user.theme === 'minimal' ? 'selected' : '' %>>Minimal — light & clean</option>
         </select>
-        <p class="mt-1.5 text-xs text-white/40"><a href="/<%= user.handle %>" target="_blank" class="text-brand-beer hover:underline">Preview your page ↗</a></p>
+        <p class="mt-1.5 text-xs text-muted"><a href="/<%= user.handle %>" target="_blank" class="text-brand-beer hover:underline">Preview your page ↗</a></p>
       </div>
     </div>
 
@@ -109,7 +109,7 @@
       <div>
         <label class="label" for="thankYouMessage">Message to supporters (optional)</label>
         <textarea class="input min-h-[88px] resize-y" id="thankYouMessage" name="thankYouMessage" maxlength="500"><%= thankYouMessage %></textarea>
-        <p class="mt-1 text-xs text-white/40">Sent by email after a tip (if supporter leaves their email).</p>
+        <p class="mt-1 text-xs text-muted">Sent by email after a tip (if supporter leaves their email).</p>
       </div>
     </div>
 

@@ -173,7 +173,18 @@ Alpine.data("mobileNav", () => ({
   },
 }))
 
-Alpine.data("supportCheckout", (config) => ({
+Alpine.data("supportCheckout", (config) => buildSupportCheckout(config))
+
+Alpine.data("creatorPage", (config) => ({
+  tab: "support",
+  setTab(name) {
+    this.tab = name
+  },
+  ...buildSupportCheckout(config),
+}))
+
+function buildSupportCheckout(config) {
+  return {
   product: "",
   membershipTierId: "",
   customAmount: "",
@@ -257,7 +268,8 @@ Alpine.data("supportCheckout", (config) => ({
     if (!this.canSubmit) return
     this.submitting = true
   },
-}))
+  }
+}
 
 Alpine.data("settingsForm", (initial) => ({
   bio: initial.bio || "",

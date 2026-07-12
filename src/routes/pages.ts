@@ -97,7 +97,7 @@ router.post("/:handle/support", supportLimiter, async (req, res) => {
   const handle = String(req.params.handle).toLowerCase()
   const creator = await findUserByHandle(handle)
   if (!creator) {
-    return res.status(404).render("pages/404", {
+    return res.status(404).render("pages/not-found", {
       title: "Not found",
       message: "This creator page doesn't exist.",
     })
@@ -288,7 +288,7 @@ router.post("/:handle/members/verify", supportLimiter, async (req, res) => {
 router.get("/commission/:id/pay", async (req, res) => {
   const commission = await findCommission(String(req.params.id))
   if (!commission || commission.status === "canceled" || commission.status === "done") {
-    return res.status(404).render("pages/404", { title: "Not found", message: "Commission not available." })
+    return res.status(404).render("pages/not-found", { title: "Not found", message: "Commission not available." })
   }
 
   const creator = await findUserById(commission.creatorId)
@@ -355,7 +355,7 @@ router.get("/:handle", async (req, res) => {
   const handle = String(req.params.handle).toLowerCase()
 
   if (isReservedHandle(handle)) {
-    return res.status(404).render("pages/404", {
+    return res.status(404).render("pages/not-found", {
       title: "Not found",
       message: "This page doesn't exist.",
     })
@@ -363,7 +363,7 @@ router.get("/:handle", async (req, res) => {
 
   const creator = await findUserByHandle(handle)
   if (!creator) {
-    return res.status(404).render("pages/404", {
+    return res.status(404).render("pages/not-found", {
       title: "Not found",
       message: "This creator page doesn't exist.",
     })

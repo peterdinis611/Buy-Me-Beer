@@ -4,7 +4,7 @@
 <div class="mx-auto flex min-h-[70vh] max-w-md items-center px-4 py-12">
   <div class="w-full animate-fade-in-up">
     <h1 class="font-display text-3xl font-bold">Create your page</h1>
-    <p class="mt-2 text-white/50">Start accepting coffee & beer tips today.</p>
+    <p class="mt-2 text-muted">Start accepting coffee & beer tips today.</p>
 
     <form action="/signup" method="post" class="animate-fade-in-up anim-delay-200 mt-8 space-y-4">
       <div class="animate-fade-in-up anim-delay-300">
@@ -14,7 +14,7 @@
       <div class="animate-fade-in-up anim-delay-400">
         <label class="label" for="handle">Username (your link)</label>
         <div class="flex items-center gap-2">
-          <span class="text-sm text-white/40"><%= baseUrl %>/</span>
+          <span class="text-sm text-muted"><%= baseUrl %>/</span>
           <input class="input" type="text" id="handle" name="handle" required pattern="[a-zA-Z0-9_-]+" placeholder="alex" />
         </div>
       </div>
@@ -29,7 +29,7 @@
       <button type="submit" class="btn-primary anim-delay-700 animate-fade-in-up w-full py-3">Create account</button>
     </form>
 
-    <p class="animate-fade-in anim-delay-800 mt-6 text-center text-sm text-white/50">
+    <p class="animate-fade-in anim-delay-800 mt-6 text-center text-sm text-muted">
       Already have an account? <a href="/login" class="text-brand-beer hover:underline">Log in</a>
     </p>
   </div>

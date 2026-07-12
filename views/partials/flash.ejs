@@ -12,7 +12,7 @@
 >
   <div class="<%= flash.type === 'success' ? 'flash-success' : flash.type === 'error' ? 'flash-error' : 'flash-info' %> flex items-start justify-between gap-3">
     <span><%= flash.message %></span>
-    <button type="button" @click="visible = false" class="shrink-0 text-white/50 hover:text-white" aria-label="Dismiss">×</button>
+    <button type="button" @click="visible = false" class="shrink-0 text-muted hover:text-app-text" aria-label="Dismiss">×</button>
   </div>
 </div>
 <% } %>
