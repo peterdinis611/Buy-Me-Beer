@@ -1,0 +1,169 @@
+<%
+  const isLight = creator.theme === 'minimal';
+  const bodyClass = creator.theme === 'dark'
+    ? 'min-h-screen bg-[#0f0f0f] font-body text-white antialiased flex flex-col'
+    : creator.theme === 'minimal'
+      ? 'min-h-screen bg-[#f5f5f4] font-body text-gray-900 antialiased flex flex-col'
+      : 'min-h-screen bg-gradient-to-b from-[#1a1208] to-brand-dark font-body text-white antialiased flex flex-col';
+%>
+
+<%- include('../partials/head', { title, bodyClass }) %>
+
+<header class="border-b <%= isLight ? 'border-gray-200 bg-white/80' : 'border-white/10 bg-black/20' %> backdrop-blur-md">
+  <div class="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
+    <a href="/" class="text-sm font-medium <%= isLight ? 'text-gray-500 hover:text-gray-900' : 'text-white/50 hover:text-white' %>">🍺 Buy Me Beer</a>
+    <% if (sessionUser && sessionUser.handle === creator.handle) { %>
+      <a href="/dashboard" class="text-sm <%= isLight ? 'text-amber-600' : 'text-brand-beer' %>">Dashboard</a>
+    <% } %>
+  </div>
+</header>
+
+<div class="mx-auto w-full max-w-lg flex-1 px-4 py-10" x-data="supportForm()">
+  <div class="animate-fade-in-up text-center">
+    <img
+      src="<%= creator.avatarUrl %>"
+      alt="<%= creator.displayName %>"
+      class="avatar-ring mx-auto size-28 rounded-full border-4 <%= isLight ? 'border-white shadow-xl' : 'border-white/20' %> object-cover animate-scale-in"
+    />
+    <h1 class="animate-fade-in-up anim-delay-100 mt-6 font-display text-3xl font-bold"><%= creator.displayName %></h1>
+    <p class="mt-1 text-sm <%= isLight ? 'text-gray-500' : 'text-white/40' %>">@<%= creator.handle %></p>
+    <% if (creator.bio) { %>
+      <p class="mx-auto mt-4 max-w-sm <%= isLight ? 'text-gray-600' : 'text-white/70' %>"><%= creator.bio %></p>
+    <% } %>
+
+    <% if (creator.website || creator.twitter || creator.github) { %>
+      <div class="mt-4 flex flex-wrap justify-center gap-3 text-sm">
+        <% if (creator.website) { %><a href="<%= creator.website %>" target="_blank" rel="noopener" class="<%= isLight ? 'text-amber-700' : 'text-brand-beer' %>">Website</a><% } %>
+        <% if (creator.twitter) { %><a href="https://twitter.com/<%= creator.twitter %>" target="_blank" rel="noopener" class="<%= isLight ? 'text-amber-700' : 'text-brand-beer' %>">@<%= creator.twitter %></a><% } %>
+        <% if (creator.github) { %><a href="https://github.com/<%= creator.github %>" target="_blank" rel="noopener" class="<%= isLight ? 'text-amber-700' : 'text-brand-beer' %>">GitHub</a><% } %>
+      </div>
+    <% } %>
+
+    <% if (creator.goalAmount > 0) { %>
+      <div class="mx-auto mt-6 max-w-sm text-left">
+        <div class="flex justify-between text-xs <%= isLight ? 'text-gray-500' : 'text-white/45' %>">
+          <span><%= creator.goalTitle || 'Goal' %></span>
+          <span><%= formatMoney(stats.total) %> / <%= formatMoney(creator.goalAmount) %></span>
+        </div>
+        <div class="mt-1.5 h-2 overflow-hidden rounded-full <%= isLight ? 'bg-gray-200' : 'bg-white/10' %>">
+          <div class="h-full rounded-full bg-brand-beer" style="width: <%= goalProgress %>%"></div>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (stats.count > 0) { %>
+      <p class="mt-4 text-sm <%= isLight ? 'text-gray-400' : 'text-white/35' %>">
+        <%= stats.count %> supporter<%= stats.count === 1 ? '' : 's' %> · <%= formatMoney(stats.total) %> total
+      </p>
+    <% } %>
+  </div>
+
+  <form action="/<%= creator.handle %>/support" method="post" class="animate-fade-in-up anim-delay-300 mt-10 space-y-4">
+    <div class="grid gap-3 sm:grid-cols-2">
+      <button type="submit" name="product" value="coffee" class="card-tip group <%= isLight ? 'border-gray-200 bg-white hover:border-amber-300 hover:shadow-lg' : 'border-white/10 bg-white/5 hover:border-brand-coffee/50 hover:bg-white/10 hover:shadow-brand-coffee/10' %>">
+        <span class="inline-block text-3xl transition-transform duration-300 group-hover:animate-wiggle">☕</span>
+        <p class="mt-2 font-semibold"><%= creator.coffeeLabel %></p>
+        <p class="text-lg font-bold <%= isLight ? 'text-amber-700' : 'text-brand-coffee' %>"><%= formatMoney(creator.coffeePrice) %></p>
+      </button>
+      <button type="submit" name="product" value="beer" class="card-tip group anim-delay-100 animate-fade-in-up <%= isLight ? 'border-gray-200 bg-white hover:border-amber-400 hover:shadow-lg' : 'border-white/10 bg-white/5 hover:border-brand-beer/50 hover:bg-white/10 hover:shadow-brand-beer/10' %>">
+        <span class="inline-block text-3xl transition-transform duration-300 group-hover:animate-wiggle">🍺</span>
+        <p class="mt-2 font-semibold"><%= creator.beerLabel %></p>
+        <p class="text-lg font-bold <%= isLight ? 'text-amber-600' : 'text-brand-beer' %>"><%= formatMoney(creator.beerPrice) %></p>
+      </button>
+    </div>
+
+    <div class="card-static animate-fade-in-up anim-delay-200 rounded-2xl border p-5 transition-all duration-300 <%= isLight ? 'border-gray-200 bg-white' : 'border-white/10 bg-white/5' %>">
+      <p class="mb-3 text-sm font-medium <%= isLight ? 'text-gray-600' : 'text-white/60' %>">Or choose custom amount (€)</p>
+      <div class="flex gap-2">
+        <input class="input flex-1 <%= isLight ? '!bg-gray-50 !text-gray-900 !border-gray-200' : '' %>" type="number" name="customAmount" min="1" max="100" step="0.5" placeholder="5.00" />
+        <button type="submit" name="product" value="custom" class="btn-primary shrink-0">Support</button>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      @click="showDetails = !showDetails"
+      class="flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm transition <%= isLight ? 'border-gray-200 bg-white text-gray-600 hover:border-amber-300' : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20' %>"
+    >
+      <span>Add a message (optional)</span>
+      <span x-text="showDetails ? '−' : '+'" class="text-lg transition-transform duration-300" :class="showDetails && 'rotate-180'"></span>
+    </button>
+
+    <div
+      x-show="showDetails"
+      x-cloak
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="opacity-0 -translate-y-2 scale-[0.98]"
+      x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+      x-transition:leave="transition ease-in duration-200"
+      x-transition:leave-start="opacity-100 translate-y-0"
+      x-transition:leave-end="opacity-0 -translate-y-2"
+      class="space-y-3"
+    >
+      <input class="input <%= isLight ? '!bg-gray-50 !text-gray-900 !border-gray-200' : '' %>" type="text" name="name" placeholder="Your name (optional)" />
+      <input class="input <%= isLight ? '!bg-gray-50 !text-gray-900 !border-gray-200' : '' %>" type="email" name="email" placeholder="Email (optional)" />
+      <div>
+        <textarea
+          x-model="message"
+          class="input min-h-[80px] resize-y <%= isLight ? '!bg-gray-50 !text-gray-900 !border-gray-200' : '' %>"
+          name="message"
+          maxlength="280"
+          placeholder="Say something nice…"
+        ></textarea>
+        <p class="mt-1 text-right text-xs <%= isLight ? 'text-gray-400' : 'text-white/35' %>">
+          <span x-text="messageLength"></span>/280
+        </p>
+      </div>
+      <label class="flex cursor-pointer items-center gap-2 text-sm <%= isLight ? 'text-gray-600' : 'text-white/60' %>">
+        <input type="hidden" name="isPublic" :value="isPublic ? 'true' : 'false'" />
+        <input type="checkbox" x-model="isPublic" class="rounded border-white/20 bg-white/5 text-brand-beer focus:ring-brand-beer/30" />
+        Show message on supporter wall
+      </label>
+    </div>
+
+    <% if (!stripeEnabled) { %>
+    <p class="text-center text-xs <%= isLight ? 'text-gray-400' : 'text-white/30' %>">Demo mode — no real charge</p>
+    <% } %>
+  </form>
+
+  <% if (typeof tiers !== 'undefined' && tiers.length > 0) { %>
+    <div class="mt-8 space-y-3">
+      <p class="text-sm font-medium <%= isLight ? 'text-gray-600' : 'text-white/60' %>">Membership tiers</p>
+      <% tiers.forEach(function(tier) { %>
+        <form action="/<%= creator.handle %>/support" method="post" class="rounded-2xl border p-4 transition hover:scale-[1.01] <%= isLight ? 'border-gray-200 bg-white hover:border-amber-300' : 'border-white/10 bg-white/5 hover:border-brand-beer/40' %>">
+          <input type="hidden" name="product" value="membership" />
+          <input type="hidden" name="membershipTierId" value="<%= tier.id %>" />
+          <div class="flex items-start justify-between gap-3">
+            <div class="text-left">
+              <p class="font-semibold"><%= tier.name %></p>
+              <% if (tier.description) { %><p class="mt-1 text-sm <%= isLight ? 'text-gray-500' : 'text-white/50' %>"><%= tier.description %></p><% } %>
+            </div>
+            <button type="submit" class="shrink-0 font-bold <%= isLight ? 'text-amber-700' : 'text-brand-beer' %>"><%= formatMoney(tier.price) %>/mo →</button>
+          </div>
+        </form>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <% if (typeof publicMessages !== 'undefined' && publicMessages.length > 0) { %>
+    <div class="mt-12">
+      <h2 class="text-center font-display text-lg font-semibold">Supporter wall</h2>
+      <div class="mt-4 space-y-3">
+        <% publicMessages.forEach(function(s) { %>
+          <div class="rounded-xl border p-4 text-left <%= isLight ? 'border-gray-200 bg-white' : 'border-white/10 bg-white/5' %>">
+            <p class="text-sm font-medium"><%= s.supporterName %> · <%= formatMoney(s.amount) %></p>
+            <p class="mt-1 text-sm <%= isLight ? 'text-gray-600' : 'text-white/65' %>">"<%= s.message %>"</p>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<footer class="py-6 text-center text-xs <%= isLight ? 'text-gray-400' : 'text-white/25' %>">
+  Powered by Buy Me Beer
+</footer>
+
+<script src="/js/app.js" defer></script>
+</body>
+</html>

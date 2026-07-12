@@ -1,0 +1,161 @@
+import { Router } from "express"
+import {
+  createSupport,
+  findMembershipTier,
+  findUserByHandle,
+  findUserById,
+  formatMoney,
+  getCreatorStats,
+  getMembershipTiers,
+  getSupportsForCreator,
+  listCreators,
+  updateSupport,
+} from "../db/queries.js"
+import { calculateGoalProgress } from "../lib/goals.js"
+import { isReservedHandle } from "../lib/handles.js"
+import { formatSupporterName, resolveSupportAmount } from "../lib/support.js"
+import { filterPublicMessages } from "../lib/stats.js"
+import { supportLimiter } from "../middleware/rateLimit.js"
+import { isStripeEnabled, createCheckoutSession } from "../services/stripe.js"
+import { firstValidationError, supportSchema } from "../lib/validation.js"
+
+const router = Router()
+
+router.get("/", (_req, res) => {
+  res.render("pages/home", { title: "Buy Me Beer — Support creators you love" })
+})
+
+router.get("/explore", async (_req, res) => {
+  const creators = await listCreators(48)
+  res.render("pages/explore", { title: "Explore creators", creators })
+})
+
+router.post("/:handle/support", supportLimiter, async (req, res) => {
+  const handle = String(req.params.handle).toLowerCase()
+  const creator = await findUserByHandle(handle)
+  if (!creator) return res.status(404).render("pages/404", { title: "Not found", message: "This creator page doesn't exist." })
+
+  const product = String(req.body.product ?? "coffee")
+  const parsed = supportSchema.safeParse({ ...req.body, product })
+
+  if (!parsed.success) {
+    req.session.flash = { type: "error", message: firstValidationError(parsed) }
+    return res.redirect(`/${creator.handle}`)
+  }
+
+  const data = parsed.data
+  let membershipTierId: string | null = null
+  let membershipPrice: number | undefined
+
+  if (data.product === "membership") {
+    const tierId = data.tierId ?? data.membershipTierId
+    if (!tierId) {
+      req.session.flash = { type: "error", message: "Please select a support tier." }
+      return res.redirect(`/${creator.handle}`)
+    }
+    const tier = await findMembershipTier(tierId)
+    if (!tier || tier.userId !== creator.id) {
+      req.session.flash = { type: "error", message: "Invalid support tier." }
+      return res.redirect(`/${creator.handle}`)
+    }
+    membershipPrice = tier.price
+    membershipTierId = tier.id
+  }
+
+  const amount = resolveSupportAmount({
+    product: data.product,
+    creator,
+    customAmount: data.customAmount,
+    membershipPrice,
+  })
+
+  const support = await createSupport({
+    creatorId: creator.id,
+    supporterName: formatSupporterName(data.name),
+    supporterEmail: data.email ?? "",
+    amount,
+    product: data.product,
+    message: data.message ?? "",
+    status: "pending",
+    stripeSessionId: null,
+    membershipTierId,
+    isPublic: data.isPublic,
+  })
+
+  const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`
+
+  if (isStripeEnabled()) {
+    try {
+      const session = await createCheckoutSession({
+        creator,
+        supportId: support.id,
+        amount,
+        product: data.product,
+        supporterName: support.supporterName,
+        supporterEmail: support.supporterEmail,
+        message: support.message,
+        baseUrl,
+      })
+      await updateSupport(support.id, { stripeSessionId: session.id })
+      if (session.url) return res.redirect(session.url)
+    } catch (err) {
+      console.error("Stripe error:", err)
+      req.session.flash = { type: "error", message: "Payment could not be started. Please try again." }
+      return res.redirect(`/${creator.handle}`)
+    }
+  }
+
+  res.redirect(`/support/success?support_id=${support.id}`)
+})
+
+router.get("/:handle", async (req, res) => {
+  const handle = String(req.params.handle).toLowerCase()
+
+  if (isReservedHandle(handle)) {
+    return res.status(404).render("pages/404", {
+      title: "Not found",
+      message: "This page doesn't exist.",
+    })
+  }
+
+  const creator = await findUserByHandle(handle)
+  if (!creator) {
+    return res.status(404).render("pages/404", {
+      title: "Not found",
+      message: "This creator page doesn't exist.",
+    })
+  }
+
+  const stats = await getCreatorStats(creator.id)
+  const publicMessages = await getSupportsForCreator(creator.id, true)
+  const tiers = await getMembershipTiers(creator.id)
+  const goalProgress = calculateGoalProgress(stats.total, creator.goalAmount)
+
+  res.render("pages/creator", {
+    title: `${creator.displayName} — Buy Me Beer`,
+    creator,
+    stats,
+    tiers,
+    publicMessages: filterPublicMessages(publicMessages),
+    goalProgress,
+    formatMoney,
+    supportConfig: {
+      coffee: {
+        label: creator.coffeeLabel,
+        formatted: formatMoney(creator.coffeePrice),
+      },
+      beer: {
+        label: creator.beerLabel,
+        formatted: formatMoney(creator.beerPrice),
+      },
+      tiers: tiers.map((t) => ({
+        id: t.id,
+        name: t.name,
+        description: t.description,
+        formatted: formatMoney(t.price),
+      })),
+    },
+  })
+})
+
+export default router

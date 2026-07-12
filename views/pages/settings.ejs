@@ -1,0 +1,95 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div
+  class="mx-auto max-w-2xl px-4 py-10"
+  x-data="settingsForm(<%- JSON.stringify({ bio: user.bio, coffeePrice: user.coffeePrice, beerPrice: user.beerPrice }) %>)"
+>
+  <h1 class="animate-fade-in-up font-display text-3xl font-bold">Profile settings</h1>
+  <p class="animate-fade-in-up anim-delay-100 mt-2 text-white/50">Customize your public creator page.</p>
+
+  <form action="/dashboard/settings" method="post" class="animate-fade-in-up anim-delay-200 mt-8 space-y-6">
+    <div class="card animate-fade-in-up anim-delay-300 space-y-4">
+      <h2 class="font-semibold">Basic info</h2>
+      <div>
+        <label class="label" for="displayName">Display name</label>
+        <input class="input" type="text" id="displayName" name="displayName" value="<%= user.displayName %>" required />
+      </div>
+      <div>
+        <label class="label" for="handle">Username</label>
+        <input class="input" type="text" id="handle" name="handle" value="<%= user.handle %>" required pattern="[a-zA-Z0-9_-]+" />
+      </div>
+      <div>
+        <label class="label" for="bio">Bio</label>
+        <textarea x-model="bio" class="input min-h-[100px] resize-y" id="bio" name="bio" maxlength="500"></textarea>
+        <p class="mt-1 text-right text-xs text-white/40"><span x-text="bioRemaining"></span> characters left</p>
+      </div>
+      <div>
+        <label class="label" for="avatarUrl">Avatar URL</label>
+        <input class="input" type="url" id="avatarUrl" name="avatarUrl" value="<%= user.avatarUrl %>" placeholder="https://..." />
+      </div>
+      <div>
+        <label class="label" for="theme">Theme</label>
+        <select class="input" id="theme" name="theme">
+          <option value="warm" <%= user.theme === 'warm' ? 'selected' : '' %>>Warm (coffee & beer)</option>
+          <option value="dark" <%= user.theme === 'dark' ? 'selected' : '' %>>Dark</option>
+          <option value="minimal" <%= user.theme === 'minimal' ? 'selected' : '' %>>Minimal</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card space-y-4">
+      <h2 class="font-semibold">Tip tiers</h2>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="label" for="coffeeLabel">☕ Coffee label</label>
+          <input class="input" type="text" id="coffeeLabel" name="coffeeLabel" value="<%= user.coffeeLabel %>" />
+          <label class="label mt-3" for="coffeePrice">Price (¢)</label>
+          <input x-model.number="coffeePrice" class="input" type="number" id="coffeePrice" name="coffeePrice" value="<%= user.coffeePrice %>" min="100" max="10000" />
+          <p class="mt-1 text-xs text-brand-beer" x-text="coffeePreview()"></p>
+        </div>
+        <div>
+          <label class="label" for="beerLabel">🍺 Beer label</label>
+          <input class="input" type="text" id="beerLabel" name="beerLabel" value="<%= user.beerLabel %>" />
+          <label class="label mt-3" for="beerPrice">Price (¢)</label>
+          <input x-model.number="beerPrice" class="input" type="number" id="beerPrice" name="beerPrice" value="<%= user.beerPrice %>" min="100" max="10000" />
+          <p class="mt-1 text-xs text-brand-beer" x-text="beerPreview()"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card space-y-4">
+      <h2 class="font-semibold">Social links</h2>
+      <div>
+        <label class="label" for="website">Website</label>
+        <input class="input" type="url" id="website" name="website" value="<%= user.website %>" placeholder="https://yoursite.com" />
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="label" for="twitter">Twitter / X</label>
+          <input class="input" type="text" id="twitter" name="twitter" value="<%= user.twitter %>" placeholder="username" />
+        </div>
+        <div>
+          <label class="label" for="github">GitHub</label>
+          <input class="input" type="text" id="github" name="github" value="<%= user.github %>" placeholder="username" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card space-y-4">
+      <h2 class="font-semibold">Funding goal</h2>
+      <div>
+        <label class="label" for="goalTitle">Goal title</label>
+        <input class="input" type="text" id="goalTitle" name="goalTitle" value="<%= user.goalTitle %>" placeholder="New camera gear" />
+      </div>
+      <div>
+        <label class="label" for="goalAmount">Target (cents, 0 = off)</label>
+        <input class="input" type="number" id="goalAmount" name="goalAmount" value="<%= user.goalAmount %>" min="0" />
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary w-full py-3">Save changes</button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

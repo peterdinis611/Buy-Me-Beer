@@ -1,0 +1,45 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="mx-auto max-w-2xl px-4 py-10">
+  <h1 class="font-display text-3xl font-bold">Security</h1>
+
+  <% if (typeof emailUnverified !== 'undefined' && emailUnverified) { %>
+    <div class="flash-info mt-4">
+      Email not verified.
+      <form action="/dashboard/security/resend-verification" method="post" class="mt-2 inline">
+        <button type="submit" class="text-brand-beer underline">Resend link</button>
+      </form>
+    </div>
+  <% } %>
+
+  <div class="card mt-8 space-y-4">
+    <h2 class="font-semibold">Change password</h2>
+    <form action="/dashboard/security/password" method="post" class="space-y-4">
+      <div>
+        <label class="label" for="currentPassword">Current password</label>
+        <input class="input" type="password" id="currentPassword" name="currentPassword" required />
+      </div>
+      <div>
+        <label class="label" for="newPassword">New password</label>
+        <input class="input" type="password" id="newPassword" name="newPassword" required minlength="8" />
+      </div>
+      <button type="submit" class="btn-primary">Update password</button>
+    </form>
+  </div>
+
+  <div class="card mt-6">
+    <h2 class="font-semibold">Email</h2>
+    <p class="mt-2 text-sm text-white/60"><%= user.email %></p>
+    <p class="mt-1 text-xs <%= user.emailVerified ? 'text-emerald-400' : 'text-amber-400' %>">
+      <%= user.emailVerified ? '✓ Verified' : 'Not verified' %>
+    </p>
+  </div>
+
+  <div class="mt-6 flex gap-2">
+    <a href="/dashboard" class="btn-ghost">← Dashboard</a>
+    <a href="/dashboard/tiers" class="btn-ghost">Membership tiers</a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
