@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm"
+import { and, desc, eq, gte, sql } from "drizzle-orm"
 import { v4 as uuid } from "uuid"
 import { RESERVED_HANDLES } from "../lib/handles.js"
 import { formatMoney } from "../lib/money.js"
@@ -7,14 +7,18 @@ import { db } from "./index.js"
 import {
   authTokens,
   assets,
+  commissions,
   membershipTiers,
   memberships,
+  posts,
   supports,
   users,
   type Asset,
+  type Commission,
   type Membership,
   type MembershipTier,
   type NewUser,
+  type Post,
   type Support,
   type User,
 } from "./schema.js"
@@ -283,4 +287,128 @@ export async function upsertAsset(
 
 export async function deleteAsset(userId: string, assetId: string) {
   await db.delete(assets).where(and(eq(assets.id, assetId), eq(assets.userId, userId)))
+}
+
+export async function hasActiveMembership(creatorId: string, email: string) {
+  const normalized = email.trim().toLowerCase()
+  if (!normalized) return false
+
+  const rows = await db
+    .select({ id: memberships.id })
+    .from(memberships)
+    .where(
+      and(
+        eq(memberships.creatorId, creatorId),
+        eq(memberships.status, "active"),
+        eq(memberships.supporterEmail, normalized)
+      )
+    )
+    .limit(1)
+
+  return rows.length > 0
+}
+
+export async function getPostsForCreator(userId: string, includeDrafts = false) {
+  const conditions = [eq(posts.userId, userId)]
+  if (!includeDrafts) conditions.push(eq(posts.published, true))
+
+  return db
+    .select()
+    .from(posts)
+    .where(and(...conditions))
+    .orderBy(desc(posts.createdAt))
+}
+
+export async function findPost(id: string) {
+  const rows = await db.select().from(posts).where(eq(posts.id, id)).limit(1)
+  return rows[0]
+}
+
+export async function upsertPost(
+  userId: string,
+  data: {
+    id?: string
+    title: string
+    body: string
+    visibility: "public" | "members"
+    published: boolean
+  }
+) {
+  if (data.id) {
+    await db
+      .update(posts)
+      .set({
+        title: data.title,
+        body: data.body,
+        visibility: data.visibility,
+        published: data.published,
+      })
+      .where(and(eq(posts.id, data.id), eq(posts.userId, userId)))
+    return findPost(data.id)
+  }
+
+  const id = uuid()
+  await db.insert(posts).values({
+    id,
+    userId,
+    title: data.title,
+    body: data.body,
+    visibility: data.visibility,
+    published: data.published,
+    createdAt: new Date(),
+  })
+  return findPost(id)
+}
+
+export async function deletePost(userId: string, postId: string) {
+  await db.delete(posts).where(and(eq(posts.id, postId), eq(posts.userId, userId)))
+}
+
+export async function getCommissionsForCreator(creatorId: string) {
+  return db
+    .select()
+    .from(commissions)
+    .where(eq(commissions.creatorId, creatorId))
+    .orderBy(desc(commissions.createdAt))
+}
+
+export async function findCommission(id: string) {
+  const rows = await db.select().from(commissions).where(eq(commissions.id, id)).limit(1)
+  return rows[0]
+}
+
+export async function createCommission(
+  data: Omit<Commission, "id" | "createdAt" | "updatedAt"> & { id?: string }
+) {
+  const now = new Date()
+  const id = data.id ?? uuid()
+  await db.insert(commissions).values({
+    ...data,
+    id,
+    createdAt: now,
+    updatedAt: now,
+  })
+  return findCommission(id)
+}
+
+export async function updateCommission(id: string, patch: Partial<Commission>) {
+  await db
+    .update(commissions)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(eq(commissions.id, id))
+  return findCommission(id)
+}
+
+export async function getCompletedSupportsSince(creatorId: string, since: Date) {
+  return db
+    .select()
+    .from(supports)
+    .where(
+      and(
+        eq(supports.creatorId, creatorId),
+        eq(supports.status, "completed"),
+        gte(supports.createdAt, since)
+      )
+    )
+    .orderBy(desc(supports.createdAt))
 }

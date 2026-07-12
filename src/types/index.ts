@@ -1,4 +1,4 @@
-export type SupportProduct = "coffee" | "beer" | "custom" | "membership" | "shop"
+export type SupportProduct = "coffee" | "beer" | "custom" | "membership" | "shop" | "commission"
 
 export type SessionUser = {
   id: string
@@ -12,6 +12,7 @@ declare module "express-session" {
   interface SessionData {
     user?: SessionUser
     flash?: { type: "success" | "error" | "info"; message: string }
+    memberAccess?: Record<string, string>
   }
 }
 

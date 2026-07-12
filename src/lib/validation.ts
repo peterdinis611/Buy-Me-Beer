@@ -62,6 +62,9 @@ export const supportSchema = z
     tierId: z.string().optional(),
     membershipTierId: z.string().optional(),
     isPublic: z.union([z.boolean(), z.string(), z.number()]).optional(),
+    isGift: z.union([z.boolean(), z.string(), z.number()]).optional(),
+    giftRecipientName: z.string().max(80).optional(),
+    giftMessage: z.string().max(280).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.product === "custom") {
@@ -81,6 +84,9 @@ export const supportSchema = z
   .transform((data) => ({
     ...data,
     isPublic: data.isPublic === undefined ? true : parseFormBoolean(data.isPublic),
+    isGift: parseFormBoolean(data.isGift),
+    giftRecipientName: data.giftRecipientName?.trim() ?? "",
+    giftMessage: data.giftMessage?.trim() ?? "",
   }))
 
 export const profileSettingsSchema = z.object({
@@ -99,6 +105,12 @@ export const profileSettingsSchema = z.object({
   goalEuros: z.coerce.number().min(0).max(100000),
   goalTitle: z.string().max(120).optional(),
   thankYouMessage: z.string().max(500).optional(),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Use a hex color like #F5A623")
+    .optional()
+    .or(z.literal("")),
+  coverImageUrl: z.string().url().optional().or(z.literal("")),
 })
 
 export function profileFromSettings(data: z.infer<typeof profileSettingsSchema>) {
@@ -118,6 +130,8 @@ export function profileFromSettings(data: z.infer<typeof profileSettingsSchema>)
     goalAmount: eurosToCents(data.goalEuros),
     goalTitle: data.goalTitle ?? "",
     thankYouMessage: data.thankYouMessage ?? "",
+    primaryColor: data.primaryColor || "#F5A623",
+    coverImageUrl: data.coverImageUrl ?? "",
   }
 }
 
@@ -140,6 +154,35 @@ export const shopAssetSchema = z.object({
 export const shopPurchaseSchema = z.object({
   name: z.string().max(80).optional(),
   email: z.string().email().optional().or(z.literal("")),
+})
+
+export const postSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(1).max(120),
+  body: z.string().max(5000).optional(),
+  visibility: z.enum(["public", "members"]).default("public"),
+  published: z.union([z.boolean(), z.string(), z.number()]).optional(),
+})
+
+export const commissionRequestSchema = z.object({
+  clientName: z.string().min(1).max(80),
+  clientEmail: z.string().email().optional().or(z.literal("")),
+  title: z.string().min(1).max(120),
+  description: z.string().max(2000).optional(),
+  priceEuros: z.coerce.number().min(5).max(5000),
+})
+
+export const commissionStatusSchema = z.object({
+  status: z.enum(["pending", "paid", "in_progress", "done", "canceled"]),
+})
+
+export const integrationsSchema = z.object({
+  discordWebhookUrl: z.string().url().optional().or(z.literal("")),
+  slackWebhookUrl: z.string().url().optional().or(z.literal("")),
+})
+
+export const memberVerifySchema = z.object({
+  email: z.string().email(),
 })
 
 export function firstValidationError(result: z.SafeParseError<unknown>): string {

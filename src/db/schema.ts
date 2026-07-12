@@ -21,6 +21,10 @@ export const users = sqliteTable("users", {
   goalAmount: integer("goal_amount").notNull().default(0),
   goalTitle: text("goal_title").notNull().default(""),
   thankYouMessage: text("thank_you_message").notNull().default(""),
+  primaryColor: text("primary_color").notNull().default("#F5A623"),
+  coverImageUrl: text("cover_image_url").notNull().default(""),
+  discordWebhookUrl: text("discord_webhook_url").notNull().default(""),
+  slackWebhookUrl: text("slack_webhook_url").notNull().default(""),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
@@ -38,7 +42,7 @@ export const supports = sqliteTable("supports", {
   supporterEmail: text("supporter_email").notNull().default(""),
   amount: integer("amount").notNull(),
   product: text("product", {
-    enum: ["coffee", "beer", "custom", "membership", "shop"],
+    enum: ["coffee", "beer", "custom", "membership", "shop", "commission"],
   }).notNull(),
   message: text("message").notNull().default(""),
   status: text("status", { enum: ["pending", "completed", "failed"] }).notNull().default("pending"),
@@ -46,6 +50,9 @@ export const supports = sqliteTable("supports", {
   membershipTierId: text("membership_tier_id"),
   assetId: text("asset_id").references(() => assets.id, { onDelete: "set null" }),
   isPublic: integer("is_public", { mode: "boolean" }).notNull().default(true),
+  isGift: integer("is_gift", { mode: "boolean" }).notNull().default(false),
+  giftRecipientName: text("gift_recipient_name").notNull().default(""),
+  giftMessage: text("gift_message").notNull().default(""),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
@@ -117,9 +124,49 @@ export const assets = sqliteTable("assets", {
     .default(sql`(unixepoch() * 1000)`),
 })
 
+export const posts = sqliteTable("posts", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  body: text("body").notNull().default(""),
+  visibility: text("visibility", { enum: ["public", "members"] }).notNull().default("public"),
+  published: integer("published", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+})
+
+export const commissions = sqliteTable("commissions", {
+  id: text("id").primaryKey(),
+  creatorId: text("creator_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  clientName: text("client_name").notNull(),
+  clientEmail: text("client_email").notNull().default(""),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  price: integer("price").notNull(),
+  status: text("status", {
+    enum: ["pending", "paid", "in_progress", "done", "canceled"],
+  })
+    .notNull()
+    .default("pending"),
+  supportId: text("support_id").references(() => supports.id, { onDelete: "set null" }),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+})
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type Support = typeof supports.$inferSelect
 export type MembershipTier = typeof membershipTiers.$inferSelect
 export type Membership = typeof memberships.$inferSelect
 export type Asset = typeof assets.$inferSelect
+export type Post = typeof posts.$inferSelect
+export type Commission = typeof commissions.$inferSelect

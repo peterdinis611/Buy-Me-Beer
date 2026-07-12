@@ -1,4 +1,4 @@
-export type SupportProduct = "coffee" | "beer" | "custom" | "membership" | "shop"
+export type SupportProduct = "coffee" | "beer" | "custom" | "membership" | "shop" | "commission"
 
 export type SupportRecord = {
   amount: number
@@ -15,6 +15,7 @@ export type CreatorStatsSummary = {
   membershipCount: number
   customCount: number
   shopCount: number
+  commissionCount: number
   averageTip: number
 }
 
@@ -27,6 +28,7 @@ export function aggregateSupportStats(supports: SupportRecord[]): CreatorStatsSu
   const customCount = supports.filter((s) => s.product === "custom").length
 
   const shopCount = supports.filter((s) => s.product === "shop").length
+  const commissionCount = supports.filter((s) => s.product === "commission").length
 
   return {
     total,
@@ -36,6 +38,7 @@ export function aggregateSupportStats(supports: SupportRecord[]): CreatorStatsSu
     membershipCount,
     customCount,
     shopCount,
+    commissionCount,
     averageTip: count > 0 ? Math.round(total / count) : 0,
   }
 }

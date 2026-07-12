@@ -3,7 +3,6 @@ import Stripe from "stripe"
 import { v4 as uuid } from "uuid"
 import {
   createSupport,
-  findMembershipTier,
   findUserById,
 } from "../db/queries.js"
 import {
@@ -12,7 +11,6 @@ import {
   completeSupport,
 } from "../services/supportCompletion.js"
 import { isStripeEnabled, retrieveSubscription, subscriptionPeriodEnd } from "../services/stripe.js"
-import { formatSupporterName } from "../lib/support.js"
 
 const router = Router()
 
