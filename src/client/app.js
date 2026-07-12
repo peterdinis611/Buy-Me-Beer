@@ -24,8 +24,100 @@ Alpine.data("flashMessage", () => ({
   },
 }))
 
+Alpine.data("themeToggle", () => ({
+  theme: "dark",
+  init() {
+    this.theme = document.documentElement.getAttribute("data-theme") || "dark"
+  },
+  toggle() {
+    this.theme = this.theme === "dark" ? "light" : "dark"
+    document.documentElement.setAttribute("data-theme", this.theme)
+    try {
+      localStorage.setItem("theme", this.theme)
+    } catch {
+      /* storage unavailable */
+    }
+  },
+  get icon() {
+    return this.theme === "dark" ? "☀️" : "🌙"
+  },
+  get label() {
+    return this.theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+  },
+}))
+
 Alpine.data("dashboardShell", () => ({
-  sidebarOpen: false,
+  mobileOpen: false,
+  desktopOpen: true,
+  isDesktop: false,
+
+  init() {
+    try {
+      const saved = localStorage.getItem("dashboard-sidebar")
+      if (saved === "closed") this.desktopOpen = false
+      if (saved === "open") this.desktopOpen = true
+    } catch {
+      /* storage unavailable */
+    }
+
+    this.mediaQuery = window.matchMedia("(min-width: 1024px)")
+    this.syncViewport = () => {
+      this.isDesktop = this.mediaQuery.matches
+      if (this.isDesktop) this.mobileOpen = false
+    }
+    this.syncViewport()
+    this.mediaQuery.addEventListener("change", this.syncViewport)
+
+    this._onKeydown = (event) => {
+      if (event.key === "Escape") this.closeSidebar()
+    }
+    document.addEventListener("keydown", this._onKeydown)
+
+    this.$watch("mobileOpen", (open) => {
+      if (!this.isDesktop) {
+        document.body.style.overflow = open ? "hidden" : ""
+      }
+    })
+  },
+
+  persistDesktop() {
+    try {
+      localStorage.setItem("dashboard-sidebar", this.desktopOpen ? "open" : "closed")
+    } catch {
+      /* storage unavailable */
+    }
+  },
+
+  openSidebar() {
+    if (this.isDesktop) {
+      this.desktopOpen = true
+      this.persistDesktop()
+    } else {
+      this.mobileOpen = true
+    }
+  },
+
+  closeSidebar() {
+    if (this.isDesktop) {
+      this.desktopOpen = false
+      this.persistDesktop()
+    } else {
+      this.mobileOpen = false
+    }
+  },
+
+  toggleSidebar() {
+    if (this.isDesktop) {
+      this.desktopOpen = !this.desktopOpen
+      this.persistDesktop()
+    } else {
+      this.mobileOpen = !this.mobileOpen
+    }
+  },
+
+  onNavClick() {
+    if (!this.isDesktop) this.mobileOpen = false
+  },
 }))
 
 Alpine.data("shareKit", (config) => ({
@@ -325,5 +417,30 @@ Alpine.data("dashboardLive", (initial) => ({
   },
 }))
 
+function hidePagePreload() {
+  const el = document.getElementById("page-preload")
+  if (!el || el.dataset.done === "1") return
+  el.dataset.done = "1"
+  el.classList.add("page-preload-done")
+  document.body.classList.remove("page-is-loading")
+  window.setTimeout(() => el.remove(), 320)
+}
+
+function scheduleHidePagePreload() {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  const minMs = reduceMotion ? 0 : 380
+  const started = performance.now()
+
+  const finish = () => {
+    const wait = Math.max(0, minMs - (performance.now() - started))
+    window.setTimeout(hidePagePreload, wait)
+  }
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(finish)
+  })
+}
+
 window.Alpine = Alpine
 Alpine.start()
+scheduleHidePagePreload()

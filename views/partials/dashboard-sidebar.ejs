@@ -3,40 +3,55 @@
 
 <aside
   class="dashboard-sidebar"
-  :class="sidebarOpen && 'dashboard-sidebar-open'"
-  @click.outside="if (window.innerWidth < 1024) sidebarOpen = false"
+  :class="{
+    'dashboard-sidebar-open': mobileOpen,
+    'dashboard-sidebar-desktop-hidden': isDesktop && !desktopOpen
+  }"
+  @click.outside="if (!isDesktop) closeSidebar()"
 >
   <div class="dashboard-sidebar-inner">
-    <div class="flex items-center justify-between gap-3 px-2">
-      <a href="/dashboard" class="flex items-center gap-2 font-display text-lg font-bold">
-        <span class="text-2xl">🍺</span>
-        <span>Buy<span class="text-brand-beer">Me</span>Beer</span>
+    <div class="dashboard-sidebar-brand">
+      <a href="/dashboard" class="dashboard-brand-link" title="Dashboard home">
+        <span class="dashboard-brand-icon">🍺</span>
+        <span class="dashboard-brand-text">Buy<span class="text-brand-beer">Me</span>Beer</span>
       </a>
-      <button type="button" class="btn-ghost p-2 lg:hidden" @click="sidebarOpen = false" aria-label="Close menu">×</button>
+      <button
+        type="button"
+        class="dashboard-sidebar-toggle"
+        @click="closeSidebar()"
+        aria-label="Close sidebar"
+      >
+        <svg class="size-5 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <svg class="hidden size-5 lg:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
     </div>
 
-    <div class="mt-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+    <div class="dashboard-profile-card">
       <img
         src="<%= user.avatarUrl %>"
         alt=""
-        class="size-11 shrink-0 rounded-full border border-white/10 object-cover"
+        class="dashboard-profile-avatar"
         onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=<%= user.handle %>'"
       />
-      <div class="min-w-0">
-        <p class="truncate font-semibold text-sm"><%= user.displayName %></p>
-        <p class="truncate text-xs text-white/40">@<%= user.handle %></p>
+      <div class="dashboard-profile-meta min-w-0">
+        <p class="truncate font-semibold text-sm text-app-text"><%= user.displayName %></p>
+        <p class="truncate text-xs text-muted">@<%= user.handle %></p>
       </div>
     </div>
 
-    <nav class="mt-8 space-y-6" aria-label="Dashboard">
+    <nav class="dashboard-nav" aria-label="Dashboard">
       <div>
         <p class="dashboard-nav-label">Overview</p>
         <div class="mt-2 space-y-1">
-          <a href="/dashboard" class="dashboard-nav-link <%= current === 'overview' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">📊</span> Dashboard
+          <a href="/dashboard" title="Dashboard" @click="onNavClick()" class="dashboard-nav-link <%= current === 'overview' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">📊</span><span class="dashboard-nav-text">Dashboard</span>
           </a>
-          <a href="/dashboard/analytics" class="dashboard-nav-link <%= current === 'analytics' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">📈</span> Analytics
+          <a href="/dashboard/analytics" title="Analytics" @click="onNavClick()" class="dashboard-nav-link <%= current === 'analytics' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">📈</span><span class="dashboard-nav-text">Analytics</span>
           </a>
         </div>
       </div>
@@ -44,11 +59,8 @@
       <div>
         <p class="dashboard-nav-label">Content</p>
         <div class="mt-2 space-y-1">
-          <a href="/dashboard/posts" class="dashboard-nav-link <%= current === 'posts' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">📝</span> Posts
-          </a>
-          <a href="/dashboard/shop" class="dashboard-nav-link <%= current === 'shop' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">🛍️</span> Shop
+          <a href="/dashboard/posts" title="Posts" @click="onNavClick()" class="dashboard-nav-link <%= current === 'posts' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">📝</span><span class="dashboard-nav-text">Posts</span>
           </a>
         </div>
       </div>
@@ -56,14 +68,14 @@
       <div>
         <p class="dashboard-nav-label">Monetization</p>
         <div class="mt-2 space-y-1">
-          <a href="/dashboard/tiers" class="dashboard-nav-link <%= current === 'tiers' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">⭐</span> Tiers
+          <a href="/dashboard/tiers" title="Tiers" @click="onNavClick()" class="dashboard-nav-link <%= current === 'tiers' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">⭐</span><span class="dashboard-nav-text">Tiers</span>
           </a>
-          <a href="/dashboard/members" class="dashboard-nav-link <%= current === 'members' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">👥</span> Members
+          <a href="/dashboard/members" title="Members" @click="onNavClick()" class="dashboard-nav-link <%= current === 'members' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">👥</span><span class="dashboard-nav-text">Members</span>
           </a>
-          <a href="/dashboard/commissions" class="dashboard-nav-link <%= current === 'commissions' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">🎨</span> Commissions
+          <a href="/dashboard/commissions" title="Commissions" @click="onNavClick()" class="dashboard-nav-link <%= current === 'commissions' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">🎨</span><span class="dashboard-nav-text">Commissions</span>
           </a>
         </div>
       </div>
@@ -71,29 +83,26 @@
       <div>
         <p class="dashboard-nav-label">Settings</p>
         <div class="mt-2 space-y-1">
-          <a href="/dashboard/settings" class="dashboard-nav-link <%= current === 'settings' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">⚙️</span> Profile
+          <a href="/dashboard/settings" title="Profile" @click="onNavClick()" class="dashboard-nav-link <%= current === 'settings' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">⚙️</span><span class="dashboard-nav-text">Profile</span>
           </a>
-          <a href="/dashboard/integrations" class="dashboard-nav-link <%= current === 'integrations' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">🔗</span> Integrations
-          </a>
-          <a href="/dashboard/security" class="dashboard-nav-link <%= current === 'security' ? 'dashboard-nav-link-active' : '' %>">
-            <span class="dashboard-nav-icon">🔒</span> Security
+          <a href="/dashboard/security" title="Security" @click="onNavClick()" class="dashboard-nav-link <%= current === 'security' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">🔒</span><span class="dashboard-nav-text">Security</span>
           </a>
         </div>
       </div>
     </nav>
 
     <div class="dashboard-sidebar-footer">
-      <a href="<%= pageProfileUrl %>" target="_blank" class="dashboard-nav-link">
-        <span class="dashboard-nav-icon">↗</span> Public page
+      <a href="<%= pageProfileUrl %>" target="_blank" title="Public page" @click="onNavClick()" class="dashboard-nav-link">
+        <span class="dashboard-nav-icon">↗</span><span class="dashboard-nav-text">Public page</span>
       </a>
-      <a href="/explore" class="dashboard-nav-link">
-        <span class="dashboard-nav-icon">🌍</span> Explore
+      <a href="/explore" title="Explore" @click="onNavClick()" class="dashboard-nav-link">
+        <span class="dashboard-nav-icon">🌍</span><span class="dashboard-nav-text">Explore</span>
       </a>
       <form action="/logout" method="post">
-        <button type="submit" class="dashboard-nav-link w-full text-left">
-          <span class="dashboard-nav-icon">⎋</span> Log out
+        <button type="submit" title="Log out" class="dashboard-nav-link w-full text-left">
+          <span class="dashboard-nav-icon">⎋</span><span class="dashboard-nav-text">Log out</span>
         </button>
       </form>
     </div>
@@ -101,8 +110,15 @@
 </aside>
 
 <div
-  x-show="sidebarOpen"
+  x-show="mobileOpen && !isDesktop"
   x-cloak
-  @click="sidebarOpen = false"
-  class="dashboard-sidebar-backdrop lg:hidden"
+  x-transition:enter="transition ease-out duration-200"
+  x-transition:enter-start="opacity-0"
+  x-transition:enter-end="opacity-100"
+  x-transition:leave="transition ease-in duration-150"
+  x-transition:leave-start="opacity-100"
+  x-transition:leave-end="opacity-0"
+  @click="closeSidebar()"
+  class="dashboard-sidebar-backdrop"
+  aria-hidden="true"
 ></div>

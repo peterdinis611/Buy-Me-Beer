@@ -1,14 +1,23 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./views/**/*.ejs"],
+  darkMode: ["selector", '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
         brand: {
           coffee: "#BD5B00",
           beer: "#F5A623",
-          dark: "#1a1a2e",
-          card: "#16213e",
+          dark: "#140e0a",
+          card: "#292524",
+        },
+        app: {
+          bg: "rgb(var(--color-bg) / <alpha-value>)",
+          elevated: "rgb(var(--color-elevated) / <alpha-value>)",
+          surface: "rgb(var(--color-surface) / <alpha-value>)",
+          border: "rgb(var(--color-border) / <alpha-value>)",
+          text: "rgb(var(--color-text) / <alpha-value>)",
+          muted: "rgb(var(--color-muted) / <alpha-value>)",
         },
       },
       fontFamily: {

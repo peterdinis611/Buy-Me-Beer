@@ -2,14 +2,32 @@
   <%- include('dashboard-sidebar', { active, user }) %>
 
   <div class="dashboard-main">
-    <header class="dashboard-topbar lg:hidden">
-      <button type="button" class="btn-ghost p-2" @click="sidebarOpen = true" aria-label="Open menu">
-        <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-      <span class="font-display font-semibold">Dashboard</span>
-      <a href="/<%= user.handle %>" class="btn-ghost p-2 text-xs">↗</a>
+    <header class="dashboard-topbar">
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          class="dashboard-sidebar-toggle"
+          @click="toggleSidebar()"
+          :aria-expanded="isDesktop ? desktopOpen : mobileOpen"
+          :title="isDesktop ? (desktopOpen ? 'Hide sidebar' : 'Show sidebar') : 'Menu'"
+          aria-label="Toggle sidebar"
+        >
+          <svg x-show="isDesktop && !desktopOpen" x-cloak class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16M11 6l-6 6 6 6" />
+          </svg>
+          <svg x-show="!isDesktop || desktopOpen" class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div class="min-w-0">
+          <p class="truncate font-display text-sm font-semibold text-app-text lg:text-base"><%= user.displayName %></p>
+          <p class="truncate text-xs text-muted lg:hidden">Creator dashboard</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/<%= user.handle %>" target="_blank" class="btn-ghost hidden px-3 py-2 text-xs sm:inline-flex">Public page ↗</a>
+        <%- include('theme-toggle') %>
+      </div>
     </header>
 
     <div class="dashboard-content">
