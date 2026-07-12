@@ -8,9 +8,12 @@
     count: stats.count,
     coffeeCount: stats.coffeeCount,
     beerCount: stats.beerCount,
+    membershipCount: stats.membershipCount,
+    customCount: stats.customCount,
     goalAmount: user.goalAmount,
     recentSupport: stats.supports.slice(0, 20).map(function(s) {
       return {
+        id: s.id,
         supporterName: s.supporterName,
         formattedAmount: formatMoney(s.amount),
         product: s.product,
@@ -68,24 +71,26 @@
         class="btn-primary mt-4 w-full text-sm"
         :class="copied && 'animate-stat-pop'"
       >
-        <span x-text="copied ? 'Copied!' : 'Copy link'"></span>
+        <span x-show="!copied && !error">Copy link</span>
+        <span x-show="copied" x-cloak>Copied!</span>
+        <span x-show="error" x-cloak class="text-red-200">Copy failed</span>
       </button>
     </div>
   </div>
 
-  <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
     <div class="card animate-fade-in-up anim-delay-300">
       <p class="text-sm text-white/50">Total earned</p>
       <p
-        class="mt-1 font-display text-3xl font-bold text-brand-beer transition-transform"
-        :class="totalPulse && 'animate-stat-pop text-brand-beer'"
+        class="mt-1 font-display text-2xl font-bold text-brand-beer transition-transform"
+        :class="totalPulse && 'animate-stat-pop'"
         x-text="totalFormatted"
       ></p>
     </div>
     <div class="card animate-fade-in-up anim-delay-400">
       <p class="text-sm text-white/50">Supporters</p>
       <p
-        class="mt-1 font-display text-3xl font-bold transition-transform"
+        class="mt-1 font-display text-2xl font-bold transition-transform"
         :class="countPulse && 'animate-stat-pop'"
         x-text="count"
       ></p>
@@ -93,7 +98,7 @@
     <div class="card animate-fade-in-up anim-delay-500">
       <p class="text-sm text-white/50">☕ Coffees</p>
       <p
-        class="mt-1 font-display text-3xl font-bold transition-transform"
+        class="mt-1 font-display text-2xl font-bold transition-transform"
         :class="coffeePulse && 'animate-stat-pop'"
         x-text="coffeeCount"
       ></p>
@@ -101,10 +106,18 @@
     <div class="card animate-fade-in-up anim-delay-600">
       <p class="text-sm text-white/50">🍺 Beers</p>
       <p
-        class="mt-1 font-display text-3xl font-bold transition-transform"
+        class="mt-1 font-display text-2xl font-bold transition-transform"
         :class="beerPulse && 'animate-stat-pop'"
         x-text="beerCount"
       ></p>
+    </div>
+    <div class="card animate-fade-in-up anim-delay-700">
+      <p class="text-sm text-white/50">⭐ Tiers</p>
+      <p class="mt-1 font-display text-2xl font-bold" x-text="membershipCount"></p>
+    </div>
+    <div class="card animate-fade-in-up anim-delay-800">
+      <p class="text-sm text-white/50">💝 Custom</p>
+      <p class="mt-1 font-display text-2xl font-bold" x-text="customCount"></p>
     </div>
   </div>
 
@@ -138,7 +151,7 @@
     </div>
 
     <div x-show="!showEmpty" class="mt-4 space-y-3">
-      <template x-for="(item, index) in recentSupport" :key="index">
+      <template x-for="item in recentSupport" :key="item.id">
         <div
           class="card flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
           :class="item.isNew && 'sse-new-row'"

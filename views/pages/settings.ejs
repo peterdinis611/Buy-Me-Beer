@@ -3,13 +3,13 @@
 
 <div
   class="mx-auto max-w-2xl px-4 py-10"
-  x-data="settingsForm(<%- JSON.stringify({ bio: user.bio, coffeePrice: user.coffeePrice, beerPrice: user.beerPrice }) %>)"
+  x-data="settingsForm(<%- JSON.stringify({ bio: user.bio, coffeePriceEuros: coffeePriceEuros, beerPriceEuros: beerPriceEuros, goalEuros: goalEuros }) %>)"
 >
   <h1 class="animate-fade-in-up font-display text-3xl font-bold">Profile settings</h1>
   <p class="animate-fade-in-up anim-delay-100 mt-2 text-white/50">Customize your public creator page.</p>
 
   <form action="/dashboard/settings" method="post" class="animate-fade-in-up anim-delay-200 mt-8 space-y-6">
-    <div class="card animate-fade-in-up anim-delay-300 space-y-4">
+    <div class="card space-y-4">
       <h2 class="font-semibold">Basic info</h2>
       <div>
         <label class="label" for="displayName">Display name</label>
@@ -18,6 +18,7 @@
       <div>
         <label class="label" for="handle">Username</label>
         <input class="input" type="text" id="handle" name="handle" value="<%= user.handle %>" required pattern="[a-zA-Z0-9_-]+" />
+        <p class="mt-1.5 text-xs text-white/40">Changing your username breaks old links — update shared URLs after saving.</p>
       </div>
       <div>
         <label class="label" for="bio">Bio</label>
@@ -31,29 +32,30 @@
       <div>
         <label class="label" for="theme">Theme</label>
         <select class="input" id="theme" name="theme">
-          <option value="warm" <%= user.theme === 'warm' ? 'selected' : '' %>>Warm (coffee & beer)</option>
-          <option value="dark" <%= user.theme === 'dark' ? 'selected' : '' %>>Dark</option>
-          <option value="minimal" <%= user.theme === 'minimal' ? 'selected' : '' %>>Minimal</option>
+          <option value="warm" <%= user.theme === 'warm' ? 'selected' : '' %>>Warm — coffee & beer gradient</option>
+          <option value="dark" <%= user.theme === 'dark' ? 'selected' : '' %>>Dark — minimal black</option>
+          <option value="minimal" <%= user.theme === 'minimal' ? 'selected' : '' %>>Minimal — light & clean</option>
         </select>
+        <p class="mt-1.5 text-xs text-white/40"><a href="/<%= user.handle %>" target="_blank" class="text-brand-beer hover:underline">Preview your page ↗</a></p>
       </div>
     </div>
 
     <div class="card space-y-4">
-      <h2 class="font-semibold">Tip tiers</h2>
+      <h2 class="font-semibold">Tip amounts</h2>
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
           <label class="label" for="coffeeLabel">☕ Coffee label</label>
           <input class="input" type="text" id="coffeeLabel" name="coffeeLabel" value="<%= user.coffeeLabel %>" />
-          <label class="label mt-3" for="coffeePrice">Price (¢)</label>
-          <input x-model.number="coffeePrice" class="input" type="number" id="coffeePrice" name="coffeePrice" value="<%= user.coffeePrice %>" min="100" max="10000" />
-          <p class="mt-1 text-xs text-brand-beer" x-text="coffeePreview()"></p>
+          <label class="label mt-3" for="coffeePriceEuros">Price (€)</label>
+          <input x-model.number="coffeePriceEuros" class="input" type="number" id="coffeePriceEuros" name="coffeePriceEuros" min="1" max="1000" step="0.5" />
+          <p class="mt-1 text-xs text-brand-beer" x-text="'Preview: ' + coffeePreview()"></p>
         </div>
         <div>
           <label class="label" for="beerLabel">🍺 Beer label</label>
           <input class="input" type="text" id="beerLabel" name="beerLabel" value="<%= user.beerLabel %>" />
-          <label class="label mt-3" for="beerPrice">Price (¢)</label>
-          <input x-model.number="beerPrice" class="input" type="number" id="beerPrice" name="beerPrice" value="<%= user.beerPrice %>" min="100" max="10000" />
-          <p class="mt-1 text-xs text-brand-beer" x-text="beerPreview()"></p>
+          <label class="label mt-3" for="beerPriceEuros">Price (€)</label>
+          <input x-model.number="beerPriceEuros" class="input" type="number" id="beerPriceEuros" name="beerPriceEuros" min="1" max="1000" step="0.5" />
+          <p class="mt-1 text-xs text-brand-beer" x-text="'Preview: ' + beerPreview()"></p>
         </div>
       </div>
     </div>
@@ -62,7 +64,7 @@
       <h2 class="font-semibold">Social links</h2>
       <div>
         <label class="label" for="website">Website</label>
-        <input class="input" type="url" id="website" name="website" value="<%= user.website %>" placeholder="https://yoursite.com" />
+        <input class="input" type="text" id="website" name="website" value="<%= user.website %>" placeholder="yoursite.com" />
       </div>
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
@@ -83,8 +85,9 @@
         <input class="input" type="text" id="goalTitle" name="goalTitle" value="<%= user.goalTitle %>" placeholder="New camera gear" />
       </div>
       <div>
-        <label class="label" for="goalAmount">Target (cents, 0 = off)</label>
-        <input class="input" type="number" id="goalAmount" name="goalAmount" value="<%= user.goalAmount %>" min="0" />
+        <label class="label" for="goalEuros">Target (€, 0 = off)</label>
+        <input x-model.number="goalEuros" class="input" type="number" id="goalEuros" name="goalEuros" min="0" step="1" />
+        <p class="mt-1 text-xs text-brand-beer" x-text="'Preview: ' + goalPreview()"></p>
       </div>
     </div>
 

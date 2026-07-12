@@ -47,7 +47,7 @@
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98] hover:-translate-y-0.5;
   }
   .btn-primary {
-    @apply btn bg-brand-beer text-brand-dark shadow-lg shadow-brand-beer/25 hover:brightness-110 hover:shadow-brand-beer/40;
+    @apply btn bg-brand-beer text-brand-dark shadow-lg shadow-brand-beer/25 hover:brightness-110 hover:shadow-brand-beer/40 disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:hover:shadow-brand-beer/25;
   }
   .btn-coffee {
     @apply btn bg-brand-coffee text-white shadow-lg shadow-brand-coffee/25 hover:brightness-110 hover:shadow-brand-coffee/40;

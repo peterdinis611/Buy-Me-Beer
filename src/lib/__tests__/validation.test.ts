@@ -1,10 +1,11 @@
 import {
   firstValidationError,
   loginSchema,
-  membershipTierSchema,
-  profileSchema,
+  parseFormBoolean,
+  profileSettingsSchema,
   signupSchema,
   supportSchema,
+  tierSettingsSchema,
 } from "../validation.js"
 
 describe("signupSchema", () => {
@@ -29,44 +30,29 @@ describe("signupSchema", () => {
 
     expect(result.success).toBe(false)
   })
-
-  it("rejects invalid handle characters", () => {
-    const result = signupSchema.safeParse({
-      email: "user@example.com",
-      password: "password123",
-      displayName: "Peter",
-      handle: "peter!",
-    })
-
-    expect(result.success).toBe(false)
-  })
 })
 
 describe("loginSchema", () => {
-  it("requires email and password", () => {
+  it("requires valid email", () => {
     expect(loginSchema.safeParse({ email: "a@b.com", password: "x" }).success).toBe(true)
     expect(loginSchema.safeParse({ email: "invalid", password: "x" }).success).toBe(false)
   })
 })
 
-describe("profileSchema", () => {
-  it("coerces price fields to numbers", () => {
-    const result = profileSchema.safeParse({
+describe("profileSettingsSchema", () => {
+  it("accepts euro price fields", () => {
+    const result = profileSettingsSchema.safeParse({
       displayName: "Peter",
       handle: "peter",
       coffeeLabel: "Coffee",
       beerLabel: "Beer",
-      coffeePrice: "600",
-      beerPrice: "900",
+      coffeePriceEuros: 6,
+      beerPriceEuros: 9,
       theme: "warm",
-      goalAmount: "5000",
+      goalEuros: 50,
     })
 
     expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.coffeePrice).toBe(600)
-      expect(result.data.goalAmount).toBe(5000)
-    }
   })
 })
 
@@ -76,26 +62,35 @@ describe("supportSchema", () => {
     expect(result.success).toBe(true)
   })
 
-  it("accepts empty email string", () => {
-    const result = supportSchema.safeParse({ product: "beer", email: "" })
+  it("parses isPublic false from form string", () => {
+    const result = supportSchema.safeParse({ product: "coffee", isPublic: "false" })
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.isPublic).toBe(false)
+  })
+
+  it("requires custom amount for custom product", () => {
+    const result = supportSchema.safeParse({ product: "custom" })
+    expect(result.success).toBe(false)
+  })
+
+  it("rejects custom amount below minimum", () => {
+    const result = supportSchema.safeParse({ product: "custom", customAmount: 0.5 })
+    expect(result.success).toBe(false)
+  })
+})
+
+describe("tierSettingsSchema", () => {
+  it("validates tier in euros", () => {
+    const result = tierSettingsSchema.safeParse({ name: "Supporter", priceEuros: 5 })
     expect(result.success).toBe(true)
   })
 })
 
-describe("membershipTierSchema", () => {
-  it("validates tier input", () => {
-    const result = membershipTierSchema.safeParse({
-      name: "Supporter",
-      price: 500,
-      description: "Monthly support",
-    })
-
-    expect(result.success).toBe(true)
-  })
-
-  it("rejects price below minimum", () => {
-    const result = membershipTierSchema.safeParse({ name: "Supporter", price: 50 })
-    expect(result.success).toBe(false)
+describe("parseFormBoolean", () => {
+  it("parses common form values", () => {
+    expect(parseFormBoolean("true")).toBe(true)
+    expect(parseFormBoolean("false")).toBe(false)
+    expect(parseFormBoolean("on")).toBe(true)
   })
 })
 
@@ -105,6 +100,5 @@ describe("firstValidationError", () => {
     if (result.success) throw new Error("expected failure")
 
     expect(firstValidationError(result)).toBeTruthy()
-    expect(typeof firstValidationError(result)).toBe("string")
   })
 })

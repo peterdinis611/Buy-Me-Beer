@@ -5,8 +5,10 @@
   <div class="animate-scale-in text-6xl">🎉</div>
   <h1 class="animate-fade-in-up anim-delay-200 mt-6 font-display text-4xl font-bold">Thank you!</h1>
   <p class="animate-fade-in-up anim-delay-300 mt-3 text-white/60">
-    <% if (demo) { %>
-      Demo payment completed — in production this would go through Stripe.
+    <% if (typeof creator !== 'undefined' && creator) { %>
+      Your support for <strong><%= creator.displayName %></strong> was received.
+    <% } else if (demo) { %>
+      Demo payment completed — in production this goes through Stripe.
     <% } else { %>
       Your support was received successfully.
     <% } %>
@@ -14,13 +16,18 @@
   <% if (support) { %>
     <div class="card animate-fade-in-up anim-delay-400 mt-8 w-full text-left">
       <p class="text-sm text-white/50">Amount</p>
-      <p class="animate-stat-pop text-2xl font-bold text-brand-beer"><%= (support.amount / 100).toFixed(2) %> €</p>
+      <p class="animate-stat-pop text-2xl font-bold text-brand-beer"><%= formatMoney(support.amount) %></p>
       <% if (support.message) { %>
         <p class="mt-3 text-sm text-white/70">"<%= support.message %>"</p>
       <% } %>
     </div>
   <% } %>
-  <a href="/" class="btn-primary animate-fade-in-up anim-delay-500 mt-10">Back to home</a>
+  <div class="animate-fade-in-up anim-delay-500 mt-10 flex flex-wrap justify-center gap-3">
+    <% if (typeof creator !== 'undefined' && creator) { %>
+      <a href="/<%= creator.handle %>" class="btn-primary">Back to @<%= creator.handle %></a>
+    <% } %>
+    <a href="/" class="btn-secondary">Home</a>
+  </div>
 </div>
 
 <%- include('../partials/footer') %>

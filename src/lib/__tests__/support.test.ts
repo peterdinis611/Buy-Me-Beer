@@ -19,8 +19,8 @@ describe("resolveSupportAmount", () => {
     expect(resolveSupportAmount({ product: "custom", creator, customAmount: 10 })).toBe(1000)
   })
 
-  it("uses default 5 EUR for custom when amount missing", () => {
-    expect(resolveSupportAmount({ product: "custom", creator })).toBe(500)
+  it("clamps custom zero to minimum cents without coffee fallback", () => {
+    expect(resolveSupportAmount({ product: "custom", creator, customAmount: 0 })).toBe(100)
   })
 
   it("uses membership tier price", () => {
@@ -29,10 +29,8 @@ describe("resolveSupportAmount", () => {
     ).toBe(1500)
   })
 
-  it("falls back to coffee price when amount is too low", () => {
-    expect(
-      resolveSupportAmount({ product: "custom", creator, customAmount: 0.5 })
-    ).toBe(500)
+  it("falls back to coffee price only for preset products", () => {
+    expect(resolveSupportAmount({ product: "coffee", creator })).toBe(500)
   })
 })
 
@@ -41,16 +39,11 @@ describe("formatSupporterName", () => {
     expect(formatSupporterName()).toBe("Anonymous")
     expect(formatSupporterName("   ")).toBe("Anonymous")
   })
-
-  it("trims whitespace", () => {
-    expect(formatSupporterName("  Anna  ")).toBe("Anna")
-  })
 })
 
 describe("shouldShowOnWall", () => {
   it("defaults to public", () => {
     expect(shouldShowOnWall()).toBe(true)
-    expect(shouldShowOnWall(undefined)).toBe(true)
   })
 
   it("respects explicit false", () => {

@@ -15,6 +15,7 @@ import { requireAuth, requireVerifiedEmail } from "../middleware/auth.js"
 import { sendVerificationEmail } from "../services/email.js"
 import { sseHub } from "../services/sse.js"
 import { calculateGoalProgress } from "../lib/goals.js"
+import { centsToEuros, eurosToCents } from "../lib/money.js"
 import { buildProfileUrl, normalizeGithubUsername, normalizeTwitterHandle, normalizeWebsiteUrl } from "../lib/social.js"
 import {
   changePasswordSchema,

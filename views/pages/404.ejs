@@ -4,8 +4,11 @@
 <div class="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center">
   <div class="animate-float text-5xl">🔍</div>
   <h1 class="animate-fade-in-up anim-delay-200 mt-4 font-display text-3xl font-bold">Page not found</h1>
-  <p class="animate-fade-in-up anim-delay-300 mt-2 text-white/50">This creator page doesn't exist.</p>
-  <a href="/" class="btn-primary animate-fade-in-up anim-delay-400 mt-8">Go home</a>
+  <p class="animate-fade-in-up anim-delay-300 mt-2 text-white/50"><%= typeof message !== 'undefined' ? message : "The page you're looking for doesn't exist." %></p>
+  <div class="animate-fade-in-up anim-delay-400 mt-8 flex flex-wrap justify-center gap-3">
+    <a href="/" class="btn-primary">Go home</a>
+    <a href="/explore" class="btn-secondary">Explore creators</a>
+  </div>
 </div>
 
 <%- include('../partials/footer') %>
