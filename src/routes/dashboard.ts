@@ -2,13 +2,17 @@ import { Router } from "express"
 import bcrypt from "bcryptjs"
 import {
   createAuthToken,
+  deleteAsset,
   deleteMembershipTier,
   findUserById,
   formatMoney,
+  getActiveMemberships,
+  getAllShopAssets,
   getCreatorStats,
   getMembershipTiers,
   isHandleTaken,
   updateUser,
+  upsertAsset,
   upsertMembershipTier,
 } from "../db/queries.js"
 import { requireAuth, requireVerifiedEmail } from "../middleware/auth.js"
@@ -22,6 +26,7 @@ import {
   firstValidationError,
   profileFromSettings,
   profileSettingsSchema,
+  shopAssetSchema,
   tierSettingsSchema,
 } from "../lib/validation.js"
 
@@ -77,6 +82,7 @@ router.get("/settings", async (req, res) => {
     coffeePriceEuros: centsToEuros(user.coffeePrice),
     beerPriceEuros: centsToEuros(user.beerPrice),
     goalEuros: centsToEuros(user.goalAmount),
+    thankYouMessage: user.thankYouMessage ?? "",
   })
 })
 
@@ -171,13 +177,14 @@ router.post("/tiers", async (req, res) => {
     return res.redirect("/dashboard/tiers")
   }
 
-  const { id, name, priceEuros, description = "" } = parsed.data
+  const { id, name, priceEuros, description = "", billingInterval } = parsed.data
 
   await upsertMembershipTier(user.id, {
     id,
     name: name.trim(),
     price: eurosToCents(priceEuros),
     description: description.trim(),
+    billingInterval,
   })
   req.session.flash = { type: "success", message: "Tier saved." }
   res.redirect("/dashboard/tiers")
@@ -189,6 +196,68 @@ router.post("/tiers/:id/delete", async (req, res) => {
   await deleteMembershipTier(user.id, req.params.id!)
   req.session.flash = { type: "success", message: "Tier deleted." }
   res.redirect("/dashboard/tiers")
+})
+
+router.get("/members", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+  const members = await getActiveMemberships(user.id)
+  const tiers = await getMembershipTiers(user.id)
+  const tierMap = Object.fromEntries(tiers.map((t) => [t.id, t.name]))
+  res.render("pages/members", { title: "Members", user, members, tierMap, formatMoney })
+})
+
+router.get("/shop", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+  const items = await getAllShopAssets(user.id)
+  res.render("pages/shop", { title: "Shop / Extras", user, items, formatMoney })
+})
+
+router.post("/shop", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+
+  const parsed = shopAssetSchema.safeParse(req.body)
+  if (!parsed.success) {
+    req.session.flash = { type: "error", message: firstValidationError(parsed) }
+    return res.redirect("/dashboard/shop")
+  }
+
+  const { id, name, description = "", src, priceEuros } = parsed.data
+  await upsertAsset(user.id, {
+    id,
+    name: name.trim(),
+    description: description.trim(),
+    src: src.trim(),
+    price: eurosToCents(priceEuros),
+  })
+  req.session.flash = { type: "success", message: "Product saved." }
+  res.redirect("/dashboard/shop")
+})
+
+router.post("/shop/:id/delete", async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+  await deleteAsset(user.id, req.params.id!)
+  req.session.flash = { type: "success", message: "Product removed." }
+  res.redirect("/dashboard/shop")
+})
+
+router.get("/qr.png", requireAuth, async (req, res) => {
+  const user = await findUserById(req.session.user!.id)
+  if (!user) return res.redirect("/login")
+
+  const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`
+  const profileUrl = buildProfileUrl(baseUrl, user.handle)
+
+  try {
+    const QRCode = await import("qrcode")
+    const png = await QRCode.toBuffer(profileUrl, { margin: 1, width: 280 })
+    res.type("png").send(png)
+  } catch {
+    res.status(500).send("QR generation failed")
+  }
 })
 
 export default router

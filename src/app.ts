@@ -6,6 +6,7 @@ import { flashToLocals } from "./middleware/auth.js"
 import authRoutes from "./routes/auth.js"
 import dashboardRoutes from "./routes/dashboard.js"
 import supportRoutes from "./routes/support.js"
+import embedRoutes from "./routes/embed.js"
 import pageRoutes from "./routes/pages.js"
 import webhookRoutes from "./routes/webhook.js"
 
@@ -44,6 +45,7 @@ export function createApp() {
   app.use(authRoutes)
   app.use("/dashboard", dashboardRoutes)
   app.use("/support", supportRoutes)
+  app.use("/embed", embedRoutes)
   app.use(pageRoutes)
 
   app.use((_req, res) => {

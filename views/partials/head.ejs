@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %> · Buy Me Beer</title>
+  <% if (typeof ogDescription !== 'undefined') { %>
+    <meta name="description" content="<%= ogDescription %>" />
+    <meta property="og:title" content="<%= title %>" />
+    <meta property="og:description" content="<%= ogDescription %>" />
+    <meta property="og:type" content="profile" />
+    <% if (typeof profileUrl !== 'undefined') { %><meta property="og:url" content="<%= profileUrl %>" /><% } %>
+    <% if (typeof ogImage !== 'undefined') { %><meta property="og:image" content="<%= ogImage %>" /><% } %>
+  <% } %>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : 'min-h-screen bg-brand-dark font-body text-white antialiased flex flex-col' %>">

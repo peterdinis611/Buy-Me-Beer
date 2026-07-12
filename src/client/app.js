@@ -24,6 +24,28 @@ Alpine.data("flashMessage", () => ({
   },
 }))
 
+Alpine.data("shareKit", (config) => ({
+  profileUrl: config.profileUrl,
+  copied: false,
+  get embedCode() {
+    return `<script src="${location.origin}/embed/${config.handle}.js" defer><\\/script>`
+  },
+  get tweetText() {
+    return `Support ${config.displayName} ☕🍺 ${config.profileUrl}`
+  },
+  async copy(text) {
+    try {
+      await navigator.clipboard.writeText(text)
+      this.copied = true
+      setTimeout(() => {
+        this.copied = false
+      }, 2000)
+    } catch {
+      /* clipboard unavailable */
+    }
+  },
+}))
+
 Alpine.data("clipboard", (url) => ({
   url,
   copied: false,
@@ -111,7 +133,7 @@ Alpine.data("supportCheckout", (config) => ({
     }
     if (this.product === "membership") {
       const tier = this.config.tiers.find((t) => t.id === this.membershipTierId)
-      return tier?.formatted ?? "—"
+      return tier?.priceLabel ?? tier?.formatted ?? "—"
     }
     return "—"
   },

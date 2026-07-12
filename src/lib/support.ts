@@ -1,6 +1,7 @@
 import { clampCents, MIN_TIP_CENTS } from "./money.js"
+import type { SupportProduct } from "../types/index.js"
 
-export type SupportProduct = "coffee" | "beer" | "custom" | "membership"
+export type { SupportProduct }
 
 export type CreatorPrices = {
   coffeePrice: number
@@ -27,6 +28,7 @@ export function resolveSupportAmount(input: ResolveSupportAmountInput): number {
       amount = clampCents(Math.round((customAmount ?? 0) * 100))
       break
     case "membership":
+    case "shop":
       amount = membershipPrice ?? creator.coffeePrice
       break
     default:

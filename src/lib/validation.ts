@@ -54,7 +54,7 @@ export const profileSchema = z.object({
 
 export const supportSchema = z
   .object({
-    product: z.enum(["coffee", "beer", "custom", "membership"]),
+    product: z.enum(["coffee", "beer", "custom", "membership", "shop"]),
     name: z.string().max(80).optional(),
     email: z.string().email().optional().or(z.literal("")),
     message: z.string().max(280).optional(),
@@ -98,6 +98,7 @@ export const profileSettingsSchema = z.object({
   github: z.string().max(50).optional(),
   goalEuros: z.coerce.number().min(0).max(100000),
   goalTitle: z.string().max(120).optional(),
+  thankYouMessage: z.string().max(500).optional(),
 })
 
 export function profileFromSettings(data: z.infer<typeof profileSettingsSchema>) {
@@ -116,6 +117,7 @@ export function profileFromSettings(data: z.infer<typeof profileSettingsSchema>)
     github: data.github ?? "",
     goalAmount: eurosToCents(data.goalEuros),
     goalTitle: data.goalTitle ?? "",
+    thankYouMessage: data.thankYouMessage ?? "",
   }
 }
 
@@ -124,6 +126,20 @@ export const tierSettingsSchema = z.object({
   name: z.string().min(1).max(80),
   priceEuros: z.coerce.number().min(1).max(500),
   description: z.string().max(200).optional(),
+  billingInterval: z.enum(["one_time", "month"]).default("one_time"),
+})
+
+export const shopAssetSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1).max(120),
+  description: z.string().max(500).optional(),
+  src: z.string().url(),
+  priceEuros: z.coerce.number().min(1).max(500),
+})
+
+export const shopPurchaseSchema = z.object({
+  name: z.string().max(80).optional(),
+  email: z.string().email().optional().or(z.literal("")),
 })
 
 export function firstValidationError(result: z.SafeParseError<unknown>): string {

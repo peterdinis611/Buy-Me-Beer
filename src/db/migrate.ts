@@ -106,11 +106,24 @@ export async function seedDemoUser() {
         name: "Supporter",
         price: 300,
         description: "Monthly thank-you + shoutout",
+        billingInterval: "month",
       })
       await upsertMembershipTier(demo.id, {
         name: "VIP",
         price: 1000,
         description: "Early access to all content",
+        billingInterval: "one_time",
+      })
+    }
+
+    const { getAllShopAssets, upsertAsset } = await import("./queries.js")
+    const shop = await getAllShopAssets(demo.id)
+    if (shop.length === 0) {
+      await upsertAsset(demo.id, {
+        name: "Creator Starter Pack",
+        description: "PDF guide + wallpaper pack",
+        src: "https://example.com/downloads/starter-pack.zip",
+        price: 500,
       })
     }
   }

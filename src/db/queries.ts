@@ -6,9 +6,13 @@ import { aggregateSupportStats } from "../lib/stats.js"
 import { db } from "./index.js"
 import {
   authTokens,
+  assets,
   membershipTiers,
+  memberships,
   supports,
   users,
+  type Asset,
+  type Membership,
   type MembershipTier,
   type NewUser,
   type Support,
@@ -140,12 +144,24 @@ export async function findMembershipTier(id: string) {
 
 export async function upsertMembershipTier(
   userId: string,
-  data: { id?: string; name: string; price: number; description: string }
+  data: {
+    id?: string
+    name: string
+    price: number
+    description: string
+    billingInterval?: "one_time" | "month"
+  }
 ) {
+  const billingInterval = data.billingInterval ?? "one_time"
   if (data.id) {
     await db
       .update(membershipTiers)
-      .set({ name: data.name, price: data.price, description: data.description })
+      .set({
+        name: data.name,
+        price: data.price,
+        description: data.description,
+        billingInterval,
+      })
       .where(and(eq(membershipTiers.id, data.id), eq(membershipTiers.userId, userId)))
     return findMembershipTier(data.id)
   }
@@ -160,6 +176,7 @@ export async function upsertMembershipTier(
     name: data.name,
     price: data.price,
     description: data.description,
+    billingInterval,
     sortOrder: Number(count[0]?.c ?? 0),
     createdAt: new Date(),
   })
@@ -175,4 +192,95 @@ export async function deleteMembershipTier(userId: string, tierId: string) {
 export async function countUsers() {
   const rows = await db.select({ c: sql<number>`count(*)` }).from(users)
   return Number(rows[0]?.c ?? 0)
+}
+
+export async function createMembership(
+  data: Omit<Membership, "id" | "createdAt"> & { id?: string }
+) {
+  const id = data.id ?? uuid()
+  await db.insert(memberships).values({ ...data, id, createdAt: new Date() })
+  return findMembershipById(id)
+}
+
+export async function findMembershipById(id: string) {
+  const rows = await db.select().from(memberships).where(eq(memberships.id, id)).limit(1)
+  return rows[0]
+}
+
+export async function findMembershipBySubscriptionId(stripeSubscriptionId: string) {
+  const rows = await db
+    .select()
+    .from(memberships)
+    .where(eq(memberships.stripeSubscriptionId, stripeSubscriptionId))
+    .limit(1)
+  return rows[0]
+}
+
+export async function updateMembership(id: string, patch: Partial<Membership>) {
+  await db.update(memberships).set(patch).where(eq(memberships.id, id))
+  return findMembershipById(id)
+}
+
+export async function getActiveMemberships(creatorId: string) {
+  return db
+    .select()
+    .from(memberships)
+    .where(and(eq(memberships.creatorId, creatorId), eq(memberships.status, "active")))
+    .orderBy(desc(memberships.createdAt))
+}
+
+export async function getShopAssets(userId: string) {
+  return db
+    .select()
+    .from(assets)
+    .where(and(eq(assets.userId, userId), eq(assets.active, true)))
+    .orderBy(desc(assets.createdAt))
+}
+
+export async function getAllShopAssets(userId: string) {
+  return db
+    .select()
+    .from(assets)
+    .where(eq(assets.userId, userId))
+    .orderBy(desc(assets.createdAt))
+}
+
+export async function findAsset(id: string) {
+  const rows = await db.select().from(assets).where(eq(assets.id, id)).limit(1)
+  return rows[0]
+}
+
+export async function upsertAsset(
+  userId: string,
+  data: { id?: string; name: string; description: string; src: string; price: number }
+) {
+  if (data.id) {
+    await db
+      .update(assets)
+      .set({
+        name: data.name,
+        description: data.description,
+        src: data.src,
+        price: data.price,
+      })
+      .where(and(eq(assets.id, data.id), eq(assets.userId, userId)))
+    return findAsset(data.id)
+  }
+  const id = uuid()
+  await db.insert(assets).values({
+    id,
+    userId,
+    name: data.name,
+    description: data.description,
+    src: data.src,
+    price: data.price,
+    width: 0,
+    height: 0,
+    createdAt: new Date(),
+  })
+  return findAsset(id)
+}
+
+export async function deleteAsset(userId: string, assetId: string) {
+  await db.delete(assets).where(and(eq(assets.id, assetId), eq(assets.userId, userId)))
 }

@@ -13,7 +13,7 @@
   const inputClass = isLight ? '!bg-gray-50 !text-gray-900 !border-gray-200' : '';
 %>
 
-<%- include('../partials/head', { title, bodyClass }) %>
+<%- include('../partials/head', { title, bodyClass, ogDescription, profileUrl, ogImage: creator.avatarUrl }) %>
 
 <header class="border-b <%= isLight ? 'border-gray-200 bg-white/80' : 'border-white/10 bg-black/20' %> backdrop-blur-md">
   <div class="mx-auto flex max-w-2xl items-center justify-between px-4 py-4">
@@ -125,7 +125,7 @@
 
     <% if (typeof tiers !== 'undefined' && tiers.length > 0) { %>
       <div class="space-y-2">
-        <p class="text-sm font-medium <%= text %>">Support tiers (one-time)</p>
+        <p class="text-sm font-medium <%= text %>">Membership & support tiers</p>
         <% tiers.forEach(function(tier) { %>
           <button
             type="button"
@@ -137,8 +137,9 @@
               <div>
                 <p class="font-semibold"><%= tier.name %></p>
                 <% if (tier.description) { %><p class="mt-1 text-sm <%= muted %>"><%= tier.description %></p><% } %>
+                <p class="mt-1 text-xs <%= muted %>"><%= tier.billingInterval === 'month' ? 'Monthly subscription' : 'One-time' %></p>
               </div>
-              <span class="shrink-0 font-bold <%= accent %>"><%= formatMoney(tier.price) %> →</span>
+              <span class="shrink-0 font-bold <%= accent %>"><%= tier.billingInterval === 'month' ? formatMoney(tier.price) + '/mo' : formatMoney(tier.price) %> →</span>
             </div>
           </button>
         <% }) %>
@@ -191,6 +192,30 @@
     <p class="text-center text-xs <%= muted %>">Secure checkout via Stripe</p>
     <% } %>
   </form>
+
+  <% if (typeof shopItems !== 'undefined' && shopItems.length > 0) { %>
+    <div class="mt-12 animate-fade-in-up">
+      <h2 class="font-display text-lg font-semibold">Shop / Extras</h2>
+      <div class="mt-4 space-y-3">
+        <% shopItems.forEach(function(item) { %>
+          <form action="/<%= creator.handle %>/shop/<%= item.id %>" method="post" class="card-static rounded-2xl border p-5 <%= surface %>">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div class="text-left">
+                <p class="font-semibold"><%= item.name %></p>
+                <% if (item.description) { %><p class="mt-1 text-sm <%= muted %>"><%= item.description %></p><% } %>
+                <p class="mt-2 text-lg font-bold <%= accent %>"><%= formatMoney(item.price) %></p>
+              </div>
+              <div class="flex flex-col gap-2 sm:w-48">
+                <input class="input <%= inputClass %>" type="text" name="name" placeholder="Your name" />
+                <input class="input <%= inputClass %>" type="email" name="email" placeholder="Email for download" />
+                <button type="submit" class="btn-primary w-full">Buy now</button>
+              </div>
+            </div>
+          </form>
+        <% }) %>
+      </div>
+    </div>
+  <% } %>
 
   <% if (typeof publicMessages !== 'undefined' && publicMessages.length > 0) { %>
     <div class="mt-12 animate-fade-in-up anim-delay-400">

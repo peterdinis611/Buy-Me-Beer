@@ -1,6 +1,6 @@
 import { Router } from "express"
 import type { Response } from "express"
-import { findUserByHandle, findUserById } from "../db/queries.js"
+import { findAsset, findUserByHandle, findUserById } from "../db/queries.js"
 import { completeSupport } from "../services/supportCompletion.js"
 import { isStripeEnabled, retrieveCheckoutSession } from "../services/stripe.js"
 import { formatMoney } from "../lib/money.js"
@@ -10,11 +10,14 @@ const router = Router()
 
 async function renderSuccess(res: Response, support: Support | undefined, demo: boolean) {
   const creator = support ? await findUserById(support.creatorId) : undefined
+  const asset =
+    support?.product === "shop" && support.assetId ? await findAsset(support.assetId) : undefined
 
   res.render("pages/success", {
     title: "Thank you!",
     support,
     creator,
+    asset,
     demo,
     formatMoney,
   })

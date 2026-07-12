@@ -1,5 +1,18 @@
-import { findSupportById, updateSupport } from "../db/queries.js"
+import {
+  createMembership,
+  findAsset,
+  findMembershipBySubscriptionId,
+  findSupportById,
+  findUserById,
+  updateMembership,
+  updateSupport,
+} from "../db/queries.js"
 import { formatMoney } from "../lib/money.js"
+import {
+  sendCreatorNewSupportEmail,
+  sendShopDownloadEmail,
+  sendSupporterThankYouEmail,
+} from "./email.js"
 import { sseHub, type SupportReceivedPayload } from "./sse.js"
 
 export function buildSupportReceivedPayload(support: {
@@ -19,6 +32,21 @@ export function buildSupportReceivedPayload(support: {
   }
 }
 
+async function notifySupportCompleted(support: NonNullable<Awaited<ReturnType<typeof findSupportById>>>) {
+  sseHub.publish(support.creatorId, "support_received", buildSupportReceivedPayload(support))
+
+  const creator = await findUserById(support.creatorId)
+  if (!creator) return
+
+  await sendCreatorNewSupportEmail(creator, support)
+  await sendSupporterThankYouEmail(creator, support)
+
+  if (support.product === "shop" && support.assetId) {
+    const asset = await findAsset(support.assetId)
+    if (asset) await sendShopDownloadEmail(creator, support, asset)
+  }
+}
+
 export async function completeSupport(
   supportId: string,
   patch?: { stripeSessionId?: string | null }
@@ -32,9 +60,43 @@ export async function completeSupport(
     ...(patch?.stripeSessionId !== undefined ? { stripeSessionId: patch.stripeSessionId } : {}),
   })
 
-  if (support) {
-    sseHub.publish(support.creatorId, "support_received", buildSupportReceivedPayload(support))
-  }
+  if (support) await notifySupportCompleted(support)
 
   return support
+}
+
+export async function activateMembership(opts: {
+  creatorId: string
+  tierId: string
+  supporterName: string
+  supporterEmail: string
+  stripeSubscriptionId?: string | null
+  currentPeriodEnd?: Date | null
+}) {
+  const existing = opts.stripeSubscriptionId
+    ? await findMembershipBySubscriptionId(opts.stripeSubscriptionId)
+    : undefined
+
+  if (existing) {
+    return updateMembership(existing.id, {
+      status: "active",
+      currentPeriodEnd: opts.currentPeriodEnd ?? existing.currentPeriodEnd,
+    })
+  }
+
+  return createMembership({
+    creatorId: opts.creatorId,
+    tierId: opts.tierId,
+    supporterName: opts.supporterName,
+    supporterEmail: opts.supporterEmail,
+    stripeSubscriptionId: opts.stripeSubscriptionId ?? null,
+    status: "active",
+    currentPeriodEnd: opts.currentPeriodEnd ?? null,
+  })
+}
+
+export async function cancelMembershipBySubscription(stripeSubscriptionId: string) {
+  const membership = await findMembershipBySubscriptionId(stripeSubscriptionId)
+  if (!membership) return undefined
+  return updateMembership(membership.id, { status: "canceled" })
 }

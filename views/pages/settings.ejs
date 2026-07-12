@@ -91,6 +91,15 @@
       </div>
     </div>
 
+    <div class="card space-y-4">
+      <h2 class="font-semibold">Thank-you email</h2>
+      <div>
+        <label class="label" for="thankYouMessage">Message to supporters (optional)</label>
+        <textarea class="input min-h-[88px] resize-y" id="thankYouMessage" name="thankYouMessage" maxlength="500"><%= thankYouMessage %></textarea>
+        <p class="mt-1 text-xs text-white/40">Sent by email after a tip (if supporter leaves their email).</p>
+      </div>
+    </div>
+
     <button type="submit" class="btn-primary w-full py-3">Save changes</button>
   </form>
 </div>
