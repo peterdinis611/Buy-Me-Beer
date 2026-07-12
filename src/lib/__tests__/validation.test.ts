@@ -44,9 +44,7 @@ describe("profileSettingsSchema", () => {
     const result = profileSettingsSchema.safeParse({
       displayName: "Peter",
       handle: "peter",
-      coffeeLabel: "Coffee",
       beerLabel: "Beer",
-      coffeePriceEuros: 6,
       beerPriceEuros: 9,
       theme: "warm",
       goalEuros: 50,
@@ -57,13 +55,13 @@ describe("profileSettingsSchema", () => {
 })
 
 describe("supportSchema", () => {
-  it("accepts coffee support", () => {
-    const result = supportSchema.safeParse({ product: "coffee", name: "Anna" })
+  it("accepts beer support", () => {
+    const result = supportSchema.safeParse({ product: "beer", name: "Anna" })
     expect(result.success).toBe(true)
   })
 
   it("parses isPublic false from form string", () => {
-    const result = supportSchema.safeParse({ product: "coffee", isPublic: "false" })
+    const result = supportSchema.safeParse({ product: "beer", isPublic: "false" })
     expect(result.success).toBe(true)
     if (result.success) expect(result.data.isPublic).toBe(false)
   })

@@ -101,7 +101,6 @@ router.get("/settings", async (req, res) => {
   res.render("pages/settings", {
     title: "Profile settings",
     user,
-    coffeePriceEuros: centsToEuros(user.coffeePrice),
     beerPriceEuros: centsToEuros(user.beerPrice),
     goalEuros: centsToEuros(user.goalAmount),
     thankYouMessage: user.thankYouMessage ?? "",

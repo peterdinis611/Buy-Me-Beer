@@ -1,4 +1,4 @@
-export type SupportProduct = "coffee" | "beer" | "custom" | "membership" | "shop" | "commission"
+export type SupportProduct = "beer" | "custom" | "membership" | "shop" | "commission"
 
 export type SessionUser = {
   id: string

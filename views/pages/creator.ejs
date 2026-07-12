@@ -134,16 +134,6 @@
               <div class="creator-tip-grid">
                 <button
                   type="button"
-                  @click="selectCoffee()"
-                  class="creator-tip creator-tip--coffee"
-                  :class="product === 'coffee' && 'creator-tip--selected'"
-                >
-                  <span class="text-2xl">☕</span>
-                  <p class="mt-1 text-sm font-semibold leading-tight"><%= creator.coffeeLabel %></p>
-                  <p class="mt-0.5 text-base font-bold creator-accent"><%= formatMoney(creator.coffeePrice) %></p>
-                </button>
-                <button
-                  type="button"
                   @click="selectBeer()"
                   class="creator-tip"
                   :class="product === 'beer' && 'creator-tip--selected'"

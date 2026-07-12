@@ -40,9 +40,7 @@ export const profileSchema = z.object({
   handle: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_-]+$/),
   bio: z.string().max(500).optional(),
   avatarUrl: z.string().url().optional().or(z.literal("")),
-  coffeeLabel: z.string().max(60),
   beerLabel: z.string().max(60),
-  coffeePrice: z.coerce.number().min(100).max(100000),
   beerPrice: z.coerce.number().min(100).max(100000),
   theme: z.enum(["warm", "dark", "minimal"]),
   website: z.string().max(200).optional(),
@@ -54,7 +52,7 @@ export const profileSchema = z.object({
 
 export const supportSchema = z
   .object({
-    product: z.enum(["coffee", "beer", "custom", "membership", "shop"]),
+    product: z.enum(["beer", "custom", "membership", "shop"]),
     name: z.string().max(80).optional(),
     email: z.string().email().optional().or(z.literal("")),
     message: z.string().max(280).optional(),
@@ -94,9 +92,7 @@ export const profileSettingsSchema = z.object({
   handle: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_-]+$/),
   bio: z.string().max(500).optional(),
   avatarUrl: z.string().url().optional().or(z.literal("")),
-  coffeeLabel: z.string().max(60),
   beerLabel: z.string().max(60),
-  coffeePriceEuros: z.coerce.number().min(1).max(1000),
   beerPriceEuros: z.coerce.number().min(1).max(1000),
   theme: z.enum(["warm", "dark", "minimal"]),
   website: z.string().max(200).optional(),
@@ -119,9 +115,7 @@ export function profileFromSettings(data: z.infer<typeof profileSettingsSchema>)
     handle: data.handle,
     bio: data.bio ?? "",
     avatarUrl: data.avatarUrl ?? "",
-    coffeeLabel: data.coffeeLabel,
     beerLabel: data.beerLabel,
-    coffeePrice: eurosToCents(data.coffeePriceEuros),
     beerPrice: eurosToCents(data.beerPriceEuros),
     theme: data.theme,
     website: data.website ?? "",

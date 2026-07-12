@@ -46,11 +46,9 @@ export async function createCheckoutSession(opts: CheckoutOpts) {
   const productName =
     product === "shop" && assetName
       ? assetName
-      : product === "coffee"
-        ? `${creator.coffeeLabel} for ${creator.displayName}`
-        : product === "beer"
-          ? `${creator.beerLabel} for ${creator.displayName}`
-          : product === "membership" && tier
+      : product === "beer"
+        ? `${creator.beerLabel} for ${creator.displayName}`
+        : product === "membership" && tier
             ? `${tier.name} — ${creator.displayName}`
             : product === "commission"
               ? `Commission for ${creator.displayName}`

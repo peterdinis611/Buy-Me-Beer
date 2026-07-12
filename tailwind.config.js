@@ -6,7 +6,6 @@ export default {
     extend: {
       colors: {
         brand: {
-          coffee: "#BD5B00",
           beer: "#F5A623",
           dark: "#140e0a",
           card: "#292524",

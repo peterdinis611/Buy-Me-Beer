@@ -10,9 +10,7 @@ export const users = sqliteTable("users", {
   displayName: text("display_name").notNull(),
   bio: text("bio").notNull().default(""),
   avatarUrl: text("avatar_url").notNull(),
-  coffeePrice: integer("coffee_price").notNull().default(500),
   beerPrice: integer("beer_price").notNull().default(800),
-  coffeeLabel: text("coffee_label").notNull().default("Buy me a coffee"),
   beerLabel: text("beer_label").notNull().default("Buy me a beer"),
   theme: text("theme", { enum: ["warm", "dark", "minimal"] }).notNull().default("warm"),
   website: text("website").notNull().default(""),
@@ -42,7 +40,7 @@ export const supports = sqliteTable("supports", {
   supporterEmail: text("supporter_email").notNull().default(""),
   amount: integer("amount").notNull(),
   product: text("product", {
-    enum: ["coffee", "beer", "custom", "membership", "shop", "commission"],
+    enum: ["beer", "custom", "membership", "shop", "commission"],
   }).notNull(),
   message: text("message").notNull().default(""),
   status: text("status", { enum: ["pending", "completed", "failed"] }).notNull().default("pending"),

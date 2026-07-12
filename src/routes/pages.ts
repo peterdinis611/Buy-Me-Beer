@@ -103,7 +103,7 @@ router.post("/:handle/support", supportLimiter, async (req, res) => {
     })
   }
 
-  const product = String(req.body.product ?? "coffee")
+  const product = String(req.body.product ?? "beer")
   const parsed = supportSchema.safeParse({ ...req.body, product })
 
   if (!parsed.success) {
@@ -411,7 +411,6 @@ router.get("/:handle", async (req, res) => {
     ogDescription: creator.bio || `Support ${creator.displayName} on Buy Me Beer`,
     brandingStyle: brandingStyle(creator.primaryColor),
     supportConfig: {
-      coffee: { label: creator.coffeeLabel, formatted: formatMoney(creator.coffeePrice) },
       beer: { label: creator.beerLabel, formatted: formatMoney(creator.beerPrice) },
       tiers: tiers.map((t) => ({
         id: t.id,

@@ -1,6 +1,6 @@
-# Buy Me Beer 🍺☕
+# Buy Me Beer 🍺
 
-A [Buy Me a Coffee](https://www.buymeacoffee.com) / Buy Me a Beer clone for creators.
+A Buy Me a Beer tipping platform for creators.
 
 **Stack:** Express.js · TypeScript · EJS · Tailwind CSS · **Drizzle ORM + SQLite** · Stripe (optional)
 
@@ -9,7 +9,7 @@ A [Buy Me a Coffee](https://www.buymeacoffee.com) / Buy Me a Beer clone for crea
 ### Core
 - Creator signup & login with sessions
 - Public profile page (`/yourname`)
-- **Buy me a coffee** & **Buy me a beer** tip tiers + custom amount
+- **Buy me a beer** tip tier + custom amount
 - Supporter messages & **supporter wall** (public messages)
 - Creator dashboard with earnings & history
 - Profile settings (bio, avatar, prices, theme)

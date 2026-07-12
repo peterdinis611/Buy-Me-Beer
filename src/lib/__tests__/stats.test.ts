@@ -13,8 +13,7 @@ describe("aggregateSupportStats", () => {
 
     expect(stats.total).toBe(3800)
     expect(stats.count).toBe(4)
-    expect(stats.coffeeCount).toBe(1)
-    expect(stats.beerCount).toBe(1)
+    expect(stats.beerCount).toBe(2)
     expect(stats.membershipCount).toBe(1)
     expect(stats.customCount).toBe(1)
   })
@@ -34,10 +33,10 @@ describe("aggregateSupportStats", () => {
 
 describe("filterPublicMessages", () => {
   const supports = [
-    { amount: 500, product: "coffee" as const, message: "Great work!", isPublic: true },
+    { amount: 500, product: "beer" as const, message: "Great work!", isPublic: true },
     { amount: 800, product: "beer" as const, message: "", isPublic: true },
-    { amount: 500, product: "coffee" as const, message: "Hidden", isPublic: false },
-    { amount: 500, product: "coffee" as const, message: "Thanks!", isPublic: true },
+    { amount: 500, product: "beer" as const, message: "Hidden", isPublic: false },
+    { amount: 500, product: "beer" as const, message: "Thanks!", isPublic: true },
   ]
 
   it("returns only public messages with text", () => {
@@ -51,7 +50,7 @@ describe("filterPublicMessages", () => {
   it("respects limit", () => {
     const many = Array.from({ length: 20 }, (_, i) => ({
       amount: 500,
-      product: "coffee" as const,
+      product: "beer" as const,
       message: `msg ${i}`,
       isPublic: true,
     }))

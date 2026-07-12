@@ -6,7 +6,6 @@
   displayName: user.displayName,
   handle: user.handle,
   avatarUrl: user.avatarUrl,
-  coffeePriceEuros: coffeePriceEuros,
   beerPriceEuros: beerPriceEuros,
   goalEuros: goalEuros,
   primaryColor: user.primaryColor || '#F5A623'
@@ -45,13 +44,9 @@
           <span class="size-4 rounded-full border border-app-line" :style="'background:' + primaryColor"></span>
           <span class="font-mono text-xs text-muted" x-text="primaryColor"></span>
         </div>
-        <div class="mt-5 grid grid-cols-2 gap-2 text-center text-xs">
-          <div class="settings-tip-card">
-            <p class="text-muted">☕ Coffee</p>
-            <p class="mt-1 font-semibold text-accent" x-text="coffeePreview()"></p>
-          </div>
-          <div class="settings-tip-card">
-            <p class="text-muted">🍺 Beer</p>
+        <div class="mt-5">
+          <div class="settings-tip-card text-center">
+            <p class="text-muted">🍺 Beer tip</p>
             <p class="mt-1 font-semibold text-accent" x-text="beerPreview()"></p>
           </div>
         </div>
@@ -150,7 +145,7 @@
           <div class="sm:col-span-2 sm:max-w-md">
             <label class="label" for="theme">Public page theme</label>
             <select class="input" id="theme" name="theme">
-              <option value="warm" <%= user.theme === 'warm' ? 'selected' : '' %>>Warm — coffee & beer gradient</option>
+              <option value="warm" <%= user.theme === 'warm' ? 'selected' : '' %>>Warm — amber & beer gradient</option>
               <option value="dark" <%= user.theme === 'dark' ? 'selected' : '' %>>Dark — minimal black</option>
               <option value="minimal" <%= user.theme === 'minimal' ? 'selected' : '' %>>Minimal — light & clean</option>
             </select>
@@ -160,36 +155,21 @@
 
       <section class="settings-section">
         <div class="settings-section-head">
-          <span class="settings-section-icon">☕</span>
+          <span class="settings-section-icon">🍺</span>
           <div>
-            <h2 class="font-display text-lg font-semibold text-app-text">Tip amounts</h2>
-            <p class="text-sm text-muted">Labels and prices shown on your support buttons.</p>
+            <h2 class="font-display text-lg font-semibold text-app-text">Tip amount</h2>
+            <p class="text-sm text-muted">Label and price shown on your support button.</p>
           </div>
         </div>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div class="settings-tip-card space-y-3">
-            <p class="text-sm font-medium text-app-text">☕ Coffee</p>
-            <div>
-              <label class="label" for="coffeeLabel">Button label</label>
-              <input class="input" type="text" id="coffeeLabel" name="coffeeLabel" value="<%= user.coffeeLabel %>" />
-            </div>
-            <div>
-              <label class="label" for="coffeePriceEuros">Price (€)</label>
-              <input x-model.number="coffeePriceEuros" class="input" type="number" id="coffeePriceEuros" name="coffeePriceEuros" min="1" max="1000" step="0.5" />
-              <p class="mt-1 text-xs text-accent" x-text="'Checkout preview: ' + coffeePreview()"></p>
-            </div>
+        <div class="settings-tip-card max-w-md space-y-3">
+          <div>
+            <label class="label" for="beerLabel">Button label</label>
+            <input class="input" type="text" id="beerLabel" name="beerLabel" value="<%= user.beerLabel %>" />
           </div>
-          <div class="settings-tip-card space-y-3">
-            <p class="text-sm font-medium text-app-text">🍺 Beer</p>
-            <div>
-              <label class="label" for="beerLabel">Button label</label>
-              <input class="input" type="text" id="beerLabel" name="beerLabel" value="<%= user.beerLabel %>" />
-            </div>
-            <div>
-              <label class="label" for="beerPriceEuros">Price (€)</label>
-              <input x-model.number="beerPriceEuros" class="input" type="number" id="beerPriceEuros" name="beerPriceEuros" min="1" max="1000" step="0.5" />
-              <p class="mt-1 text-xs text-accent" x-text="'Checkout preview: ' + beerPreview()"></p>
-            </div>
+          <div>
+            <label class="label" for="beerPriceEuros">Price (€)</label>
+            <input x-model.number="beerPriceEuros" class="input" type="number" id="beerPriceEuros" name="beerPriceEuros" min="1" max="1000" step="0.5" />
+            <p class="mt-1 text-xs text-accent" x-text="'Checkout preview: ' + beerPreview()"></p>
           </div>
         </div>
       </section>

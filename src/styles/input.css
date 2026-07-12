@@ -117,9 +117,6 @@
   [data-theme="light"] .btn-primary {
     @apply bg-amber-600 text-white shadow-amber-600/20 hover:shadow-amber-600/30;
   }
-  .btn-coffee {
-    @apply btn bg-brand-coffee text-white shadow-lg shadow-brand-coffee/25 hover:brightness-110 hover:shadow-brand-coffee/40;
-  }
   .btn-secondary {
     @apply btn border-app-line bg-app-surface text-app-text hover:bg-app-elevated/80;
   }
@@ -510,7 +507,7 @@
   }
 
   .creator-tip-grid {
-    @apply grid gap-2 sm:grid-cols-3;
+    @apply grid gap-2 sm:grid-cols-2;
   }
 
   .creator-tip {
@@ -628,14 +625,6 @@
     @apply ring-2 ring-amber-500/60 border-amber-300 bg-amber-50;
   }
 
-  .creator-page[data-creator-theme="dark"] .creator-tip--selected.creator-tip--coffee {
-    @apply ring-brand-coffee/60 bg-white/10;
-  }
-
-  .creator-page[data-creator-theme="light"] .creator-tip--selected.creator-tip--coffee {
-    @apply ring-amber-600/50 border-amber-400 bg-amber-50;
-  }
-
   .creator-page[data-creator-theme="dark"] .creator-tier-row {
     @apply border-white/10 bg-white/[0.04] hover:bg-white/[0.07];
   }
@@ -717,7 +706,7 @@
   }
 
   .settings-preview-banner {
-    @apply h-20 bg-gradient-to-br from-brand-beer/30 via-brand-coffee/20 to-transparent;
+    @apply h-20 bg-gradient-to-br from-brand-beer/30 via-amber-600/20 to-transparent;
   }
 
   .settings-section {

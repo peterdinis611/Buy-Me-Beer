@@ -2,7 +2,6 @@ import Alpine from "alpinejs"
 import { createRichPostEditor } from "./post-prosemirror.js"
 
 const PRODUCT_EMOJI = {
-  coffee: "☕",
   beer: "🍺",
   custom: "💝",
   membership: "⭐",
@@ -128,7 +127,7 @@ Alpine.data("shareKit", (config) => ({
     return `<script src="${location.origin}/embed/${config.handle}.js" defer><\\/script>`
   },
   get tweetText() {
-    return `Support ${config.displayName} ☕🍺 ${config.profileUrl}`
+    return `Support ${config.displayName} 🍺 ${config.profileUrl}`
   },
   async copy(text) {
     try {
@@ -199,11 +198,6 @@ function buildSupportCheckout(config) {
   submitting: false,
   config,
 
-  selectCoffee() {
-    this.product = "coffee"
-    this.membershipTierId = ""
-  },
-
   selectBeer() {
     this.product = "beer"
     this.membershipTierId = ""
@@ -224,7 +218,6 @@ function buildSupportCheckout(config) {
   },
 
   get summaryLabel() {
-    if (this.product === "coffee") return this.config.coffee.label
     if (this.product === "beer") return this.config.beer.label
     if (this.product === "custom") return "Custom amount"
     if (this.product === "membership") {
@@ -235,7 +228,6 @@ function buildSupportCheckout(config) {
   },
 
   get summaryAmount() {
-    if (this.product === "coffee") return this.config.coffee.formatted
     if (this.product === "beer") return this.config.beer.formatted
     if (this.product === "custom") {
       const euros = Number(this.customAmount)
@@ -277,15 +269,11 @@ Alpine.data("settingsForm", (initial) => ({
   displayName: initial.displayName || "",
   handle: initial.handle || "",
   avatarUrl: initial.avatarUrl || "",
-  coffeePriceEuros: initial.coffeePriceEuros ?? 5,
   beerPriceEuros: initial.beerPriceEuros ?? 8,
   goalEuros: initial.goalEuros ?? 0,
   primaryColor: initial.primaryColor || "#F5A623",
   get bioRemaining() {
     return 500 - (this.bio?.length ?? 0)
-  },
-  coffeePreview() {
-    return formatMoney(Math.round(this.coffeePriceEuros * 100))
   },
   beerPreview() {
     return formatMoney(Math.round(this.beerPriceEuros * 100))
@@ -500,7 +488,6 @@ Alpine.data("confirmDelete", () => ({
 Alpine.data("dashboardLive", (initial) => ({
   totalCents: initial.totalCents,
   count: initial.count,
-  coffeeCount: initial.coffeeCount,
   beerCount: initial.beerCount,
   membershipCount: initial.membershipCount ?? 0,
   customCount: initial.customCount ?? 0,
@@ -510,7 +497,6 @@ Alpine.data("dashboardLive", (initial) => ({
   showEmpty: initial.recentSupport.length === 0,
   totalPulse: false,
   countPulse: false,
-  coffeePulse: false,
   beerPulse: false,
   goalPulse: false,
 
@@ -558,10 +544,7 @@ Alpine.data("dashboardLive", (initial) => ({
     this.bump("count")
     this.bump("goal")
 
-    if (payload.product === "coffee") {
-      this.coffeeCount += 1
-      this.bump("coffee")
-    } else if (payload.product === "beer") {
+    if (payload.product === "beer" || payload.product === "coffee") {
       this.beerCount += 1
       this.bump("beer")
     } else if (payload.product === "membership") {

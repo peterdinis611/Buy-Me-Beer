@@ -4,7 +4,6 @@ import type { SupportProduct } from "../types/index.js"
 export type { SupportProduct }
 
 export type CreatorPrices = {
-  coffeePrice: number
   beerPrice: number
 }
 
@@ -18,7 +17,7 @@ export type ResolveSupportAmountInput = {
 export function resolveSupportAmount(input: ResolveSupportAmountInput): number {
   const { product, creator, customAmount, membershipPrice } = input
 
-  let amount = creator.coffeePrice
+  let amount = creator.beerPrice
 
   switch (product) {
     case "beer":
@@ -29,14 +28,14 @@ export function resolveSupportAmount(input: ResolveSupportAmountInput): number {
       break
     case "membership":
     case "shop":
-      amount = membershipPrice ?? creator.coffeePrice
+      amount = membershipPrice ?? creator.beerPrice
       break
     default:
-      amount = creator.coffeePrice
+      amount = creator.beerPrice
   }
 
   if (product !== "custom" && amount < MIN_TIP_CENTS) {
-    amount = creator.coffeePrice
+    amount = creator.beerPrice
   }
 
   return amount

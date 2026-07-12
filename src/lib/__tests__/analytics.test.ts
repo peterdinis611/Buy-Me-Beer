@@ -20,7 +20,7 @@ describe("supportsToCsv", () => {
         supporterName: "Anna",
         supporterEmail: "anna@example.com",
         amount: 500,
-        product: "coffee",
+        product: "beer",
         message: "Nice!",
         isGift: true,
         giftRecipientName: "Peter",

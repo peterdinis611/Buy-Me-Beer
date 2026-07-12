@@ -4,7 +4,6 @@
 <script type="application/json" id="dashboard-live-config"><%- JSON.stringify({
   totalCents: stats.total,
   count: stats.count,
-  coffeeCount: stats.coffeeCount,
   beerCount: stats.beerCount,
   membershipCount: stats.membershipCount,
   customCount: stats.customCount,
@@ -17,7 +16,7 @@
       formattedAmount: formatMoney(s.amount),
       product: s.product,
       message: s.message || '',
-      emoji: s.product === 'coffee' ? '☕' : s.product === 'beer' ? '🍺' : s.product === 'membership' ? '⭐' : s.product === 'shop' ? '🛍️' : '💝',
+      emoji: s.product === 'beer' || s.product === 'coffee' ? '🍺' : s.product === 'membership' ? '⭐' : s.product === 'shop' ? '🛍️' : '💝',
       isNew: false,
       dateLabel: new Date(s.createdAt).toLocaleDateString()
     }
@@ -85,22 +84,15 @@
     </div>
   </div>
 
-  <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+  <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
     <div class="stat-pill animate-fade-in-up anim-delay-200">
-      <span class="text-2xl">☕</span>
-      <div>
-        <p class="stat-pill-label">Coffees</p>
-        <p class="stat-pill-value" :class="coffeePulse && 'animate-stat-pop'" x-text="coffeeCount"></p>
-      </div>
-    </div>
-    <div class="stat-pill animate-fade-in-up anim-delay-300">
       <span class="text-2xl">🍺</span>
       <div>
         <p class="stat-pill-label">Beers</p>
         <p class="stat-pill-value" :class="beerPulse && 'animate-stat-pop'" x-text="beerCount"></p>
       </div>
     </div>
-    <div class="stat-pill animate-fade-in-up anim-delay-400">
+    <div class="stat-pill animate-fade-in-up anim-delay-300">
       <span class="text-2xl">⭐</span>
       <div>
         <p class="stat-pill-label">Tiers</p>

@@ -47,9 +47,7 @@ export async function migrateLegacyJson() {
       displayName: String(u.displayName),
       bio: String(u.bio ?? ""),
       avatarUrl: String(u.avatarUrl),
-      coffeePrice: Number(u.coffeePrice ?? 500),
       beerPrice: Number(u.beerPrice ?? 800),
-      coffeeLabel: String(u.coffeeLabel ?? "Buy me a coffee"),
       beerLabel: String(u.beerLabel ?? "Buy me a beer"),
       theme: (u.theme as "warm" | "dark" | "minimal") ?? "warm",
       website: "",
@@ -72,11 +70,9 @@ export async function seedDemoUser() {
       emailVerified: true,
       handle: "demo",
       displayName: "Demo Creator",
-      bio: "Demo profile — try coffee ☕, beer 🍺, or membership tiers!",
+      bio: "Demo profile — try beer 🍺 tips or membership tiers!",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=demo-creator",
-      coffeePrice: 500,
       beerPrice: 800,
-      coffeeLabel: "Buy me a coffee",
       beerLabel: "Buy me a beer",
       theme: "warm",
       website: "https://example.com",
@@ -88,7 +84,7 @@ export async function seedDemoUser() {
   } else {
     const { updateUser } = await import("./queries.js")
     await updateUser(existing.id, {
-      bio: "Demo profile — try coffee ☕, beer 🍺, or membership tiers!",
+      bio: "Demo profile — try beer 🍺 tips or membership tiers!",
       website: existing.website || "https://example.com",
       twitter: existing.twitter || "democreator",
       github: existing.github || "demo",
