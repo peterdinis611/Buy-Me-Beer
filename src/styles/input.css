@@ -97,6 +97,86 @@
   [x-cloak] {
     @apply hidden;
   }
+
+  .dashboard-shell {
+    @apply flex min-h-screen bg-brand-dark text-white;
+  }
+
+  .dashboard-sidebar {
+    @apply fixed inset-y-0 left-0 z-40 w-72 -translate-x-full border-r border-white/10 bg-[#0c0c14]/95 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0;
+  }
+
+  .dashboard-sidebar-open {
+    @apply translate-x-0;
+  }
+
+  .dashboard-sidebar-inner {
+    @apply flex h-full flex-col overflow-y-auto px-4 py-5;
+  }
+
+  .dashboard-sidebar-footer {
+    @apply mt-auto space-y-1 border-t border-white/10 pt-4;
+  }
+
+  .dashboard-sidebar-backdrop {
+    @apply fixed inset-0 z-30 bg-black/60 backdrop-blur-sm;
+  }
+
+  .dashboard-main {
+    @apply flex min-h-screen min-w-0 flex-1 flex-col;
+  }
+
+  .dashboard-topbar {
+    @apply sticky top-0 z-20 flex items-center justify-between border-b border-white/10 bg-brand-dark/90 px-4 py-3 backdrop-blur-md;
+  }
+
+  .dashboard-content {
+    @apply flex-1 px-4 py-6 lg:px-8 lg:py-8;
+  }
+
+  .dashboard-nav-label {
+    @apply px-3 text-[11px] font-semibold uppercase tracking-wider text-white/35;
+  }
+
+  .dashboard-nav-link {
+    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/65 transition-all duration-200 hover:bg-white/5 hover:text-white;
+  }
+
+  .dashboard-nav-link-active {
+    @apply bg-brand-beer/15 text-brand-beer ring-1 ring-brand-beer/25 hover:bg-brand-beer/15 hover:text-brand-beer;
+  }
+
+  .dashboard-nav-icon {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5 text-base;
+  }
+
+  .dashboard-nav-link-active .dashboard-nav-icon {
+    @apply bg-brand-beer/20;
+  }
+
+  .stat-hero {
+    @apply card-static relative overflow-hidden p-6 lg:p-8;
+  }
+
+  .stat-hero-primary {
+    @apply border-brand-beer/20 bg-gradient-to-br from-brand-beer/15 via-white/5 to-transparent;
+  }
+
+  .stat-pill {
+    @apply card-static flex items-center gap-3 p-4 transition-all duration-300 hover:border-white/20;
+  }
+
+  .page-header {
+    @apply mb-8 animate-fade-in-up;
+  }
+
+  .page-title {
+    @apply font-display text-2xl font-bold lg:text-3xl;
+  }
+
+  .page-subtitle {
+    @apply mt-1 text-sm text-white/50 lg:text-base;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

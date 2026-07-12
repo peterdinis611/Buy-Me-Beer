@@ -24,6 +24,10 @@ Alpine.data("flashMessage", () => ({
   },
 }))
 
+Alpine.data("dashboardShell", () => ({
+  sidebarOpen: false,
+}))
+
 Alpine.data("shareKit", (config) => ({
   profileUrl: config.profileUrl,
   copied: false,

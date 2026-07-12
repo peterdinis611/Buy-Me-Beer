@@ -1,16 +1,18 @@
 <%- include('../partials/head', { title }) %>
-<%- include('../partials/nav') %>
+<%- include('../partials/dashboard-shell-open', { active: 'commissions', user }) %>
 
-<div class="mx-auto max-w-4xl px-4 py-10">
-  <h1 class="font-display text-3xl font-bold">Commissions</h1>
-  <p class="mt-2 text-white/50">Manage client requests and payment status.</p>
+<div class="mx-auto max-w-4xl">
+  <header class="page-header">
+    <h1 class="page-title">Commissions</h1>
+    <p class="page-subtitle">Manage client requests and payment status.</p>
+  </header>
 
   <% if (items.length === 0) { %>
-    <div class="card mt-8 text-white/50">No commission requests yet.</div>
+    <div class="card-static py-12 text-center text-white/50">No commission requests yet.</div>
   <% } else { %>
-    <div class="mt-8 space-y-4">
+    <div class="space-y-4">
       <% items.forEach(function(item) { %>
-        <div class="card text-left">
+        <div class="card-static text-left">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p class="font-semibold"><%= item.title %></p>
@@ -41,4 +43,5 @@
   <% } %>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/dashboard-shell-close') %>
+<%- include('../partials/dashboard-footer') %>

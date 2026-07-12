@@ -1,0 +1,108 @@
+<% const current = typeof active !== 'undefined' ? active : ''; %>
+<% const pageProfileUrl = typeof dashboardProfileUrl !== 'undefined' ? dashboardProfileUrl : ('/' + user.handle); %>
+
+<aside
+  class="dashboard-sidebar"
+  :class="sidebarOpen && 'dashboard-sidebar-open'"
+  @click.outside="if (window.innerWidth < 1024) sidebarOpen = false"
+>
+  <div class="dashboard-sidebar-inner">
+    <div class="flex items-center justify-between gap-3 px-2">
+      <a href="/dashboard" class="flex items-center gap-2 font-display text-lg font-bold">
+        <span class="text-2xl">🍺</span>
+        <span>Buy<span class="text-brand-beer">Me</span>Beer</span>
+      </a>
+      <button type="button" class="btn-ghost p-2 lg:hidden" @click="sidebarOpen = false" aria-label="Close menu">×</button>
+    </div>
+
+    <div class="mt-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+      <img
+        src="<%= user.avatarUrl %>"
+        alt=""
+        class="size-11 shrink-0 rounded-full border border-white/10 object-cover"
+        onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=<%= user.handle %>'"
+      />
+      <div class="min-w-0">
+        <p class="truncate font-semibold text-sm"><%= user.displayName %></p>
+        <p class="truncate text-xs text-white/40">@<%= user.handle %></p>
+      </div>
+    </div>
+
+    <nav class="mt-8 space-y-6" aria-label="Dashboard">
+      <div>
+        <p class="dashboard-nav-label">Overview</p>
+        <div class="mt-2 space-y-1">
+          <a href="/dashboard" class="dashboard-nav-link <%= current === 'overview' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">📊</span> Dashboard
+          </a>
+          <a href="/dashboard/analytics" class="dashboard-nav-link <%= current === 'analytics' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">📈</span> Analytics
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <p class="dashboard-nav-label">Content</p>
+        <div class="mt-2 space-y-1">
+          <a href="/dashboard/posts" class="dashboard-nav-link <%= current === 'posts' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">📝</span> Posts
+          </a>
+          <a href="/dashboard/shop" class="dashboard-nav-link <%= current === 'shop' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">🛍️</span> Shop
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <p class="dashboard-nav-label">Monetization</p>
+        <div class="mt-2 space-y-1">
+          <a href="/dashboard/tiers" class="dashboard-nav-link <%= current === 'tiers' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">⭐</span> Tiers
+          </a>
+          <a href="/dashboard/members" class="dashboard-nav-link <%= current === 'members' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">👥</span> Members
+          </a>
+          <a href="/dashboard/commissions" class="dashboard-nav-link <%= current === 'commissions' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">🎨</span> Commissions
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <p class="dashboard-nav-label">Settings</p>
+        <div class="mt-2 space-y-1">
+          <a href="/dashboard/settings" class="dashboard-nav-link <%= current === 'settings' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">⚙️</span> Profile
+          </a>
+          <a href="/dashboard/integrations" class="dashboard-nav-link <%= current === 'integrations' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">🔗</span> Integrations
+          </a>
+          <a href="/dashboard/security" class="dashboard-nav-link <%= current === 'security' ? 'dashboard-nav-link-active' : '' %>">
+            <span class="dashboard-nav-icon">🔒</span> Security
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="dashboard-sidebar-footer">
+      <a href="<%= pageProfileUrl %>" target="_blank" class="dashboard-nav-link">
+        <span class="dashboard-nav-icon">↗</span> Public page
+      </a>
+      <a href="/explore" class="dashboard-nav-link">
+        <span class="dashboard-nav-icon">🌍</span> Explore
+      </a>
+      <form action="/logout" method="post">
+        <button type="submit" class="dashboard-nav-link w-full text-left">
+          <span class="dashboard-nav-icon">⎋</span> Log out
+        </button>
+      </form>
+    </div>
+  </div>
+</aside>
+
+<div
+  x-show="sidebarOpen"
+  x-cloak
+  @click="sidebarOpen = false"
+  class="dashboard-sidebar-backdrop lg:hidden"
+></div>

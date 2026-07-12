@@ -1,0 +1,16 @@
+<div x-data="dashboardShell()" class="dashboard-shell">
+  <%- include('dashboard-sidebar', { active, user }) %>
+
+  <div class="dashboard-main">
+    <header class="dashboard-topbar lg:hidden">
+      <button type="button" class="btn-ghost p-2" @click="sidebarOpen = true" aria-label="Open menu">
+        <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <span class="font-display font-semibold">Dashboard</span>
+      <a href="/<%= user.handle %>" class="btn-ghost p-2 text-xs">↗</a>
+    </header>
+
+    <div class="dashboard-content">
+      <%- include('flash') %>

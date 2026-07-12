@@ -1,8 +1,7 @@
 <%- include('../partials/head', { title }) %>
-<%- include('../partials/nav') %>
+<%- include('../partials/dashboard-shell-open', { active: 'overview', user }) %>
 
 <div
-  class="mx-auto max-w-6xl px-4 py-10"
   x-data="dashboardLive(<%- JSON.stringify({
     totalCents: stats.total,
     count: stats.count,
@@ -10,6 +9,7 @@
     beerCount: stats.beerCount,
     membershipCount: stats.membershipCount,
     customCount: stats.customCount,
+    shopCount: stats.shopCount || 0,
     goalAmount: user.goalAmount,
     recentSupport: stats.supports.slice(0, 20).map(function(s) {
       return {
@@ -18,164 +18,173 @@
         formattedAmount: formatMoney(s.amount),
         product: s.product,
         message: s.message || '',
-        emoji: s.product === 'coffee' ? '☕' : s.product === 'beer' ? '🍺' : '💝',
+        emoji: s.product === 'coffee' ? '☕' : s.product === 'beer' ? '🍺' : s.product === 'membership' ? '⭐' : s.product === 'shop' ? '🛍️' : '💝',
         isNew: false,
         dateLabel: new Date(s.createdAt).toLocaleDateString()
       }
     })
   }) %>)"
 >
-  <div class="fixed top-20 right-4 z-50 flex flex-col gap-2 pointer-events-none" aria-live="polite">
+  <div class="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2 lg:bottom-8 lg:right-8" aria-live="polite">
     <template x-for="toast in toasts" :key="toast.id">
       <div
         x-show="toast.visible"
-        x-transition:enter="transition ease-out duration-400"
-        x-transition:enter-start="opacity-0 translate-x-8 scale-95"
-        x-transition:enter-end="opacity-100 translate-x-0 scale-100"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="opacity-100 translate-x-0 scale-100"
-        x-transition:leave-end="opacity-0 translate-x-8 scale-95"
+        x-transition
         class="sse-toast pointer-events-auto"
       >
         <p class="text-xs uppercase tracking-wide text-brand-beer/80">New support!</p>
-        <p class="mt-1 font-semibold"><span x-text="toast.supporterName"></span> <span class="inline-block animate-wiggle" x-text="toast.emoji"></span></p>
+        <p class="mt-1 font-semibold"><span x-text="toast.supporterName"></span> <span x-text="toast.emoji"></span></p>
         <p class="text-brand-beer" x-text="toast.formattedAmount"></p>
-        <p x-show="toast.message" class="mt-1 text-sm text-white/60" x-text="'&quot;' + toast.message + '&quot;'"></p>
       </div>
     </template>
   </div>
 
-  <div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-    <div class="animate-fade-in-up">
-      <h1 class="font-display text-3xl font-bold">Hey, <%= user.displayName %> 👋</h1>
-      <p class="mt-2 text-white/50">Your creator dashboard</p>
-      <div class="mt-4 flex flex-wrap gap-2">
-        <a href="/dashboard/posts" class="btn-secondary">Posts</a>
-        <a href="/dashboard/analytics" class="btn-secondary">Analytics</a>
-        <a href="/dashboard/commissions" class="btn-secondary">Commissions</a>
-        <a href="/dashboard/integrations" class="btn-secondary">Integrations</a>
-        <a href="/dashboard/settings" class="btn-secondary">Edit profile</a>
-        <a href="/dashboard/tiers" class="btn-secondary">Tiers</a>
-        <a href="/dashboard/shop" class="btn-secondary">Shop</a>
-        <a href="/dashboard/members" class="btn-secondary">Members</a>
-        <a href="/dashboard/security" class="btn-secondary">Security</a>
-        <a href="/<%= user.handle %>" target="_blank" class="btn-ghost">View public page ↗</a>
-      </div>
-      <% if (typeof emailUnverified !== 'undefined' && emailUnverified) { %>
-        <div class="flash-info mt-4 max-w-lg text-left text-sm">
-          Verify your email in <a href="/dashboard/security" class="underline">Security</a>.
-        </div>
-      <% } %>
+  <header class="page-header flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <p class="text-sm text-brand-beer/80">Creator dashboard</p>
+      <h1 class="page-title">Hey, <%= user.displayName %> 👋</h1>
+      <p class="page-subtitle">Live overview of your tips, members, and supporters.</p>
     </div>
+    <a href="/dashboard/analytics" class="btn-secondary shrink-0 text-sm">View analytics →</a>
+  </header>
 
-    <div class="card max-w-md animate-scale-in anim-delay-200" x-data="shareKit(<%- JSON.stringify({ profileUrl, handle: user.handle, displayName: user.displayName }) %>)">
-      <p class="text-xs uppercase tracking-wide text-white/40">Share kit</p>
-      <img src="/dashboard/qr.png" alt="QR code" class="mx-auto mt-3 size-36 rounded-xl border border-white/10 bg-white p-2" />
-      <p class="mt-3 break-all font-mono text-sm text-brand-beer"><%= profileUrl %></p>
-      <div class="mt-4 flex flex-wrap gap-2">
-        <button type="button" @click="copy(profileUrl)" class="btn-secondary flex-1 text-xs">Copy link</button>
-        <button type="button" @click="copy(embedCode)" class="btn-secondary flex-1 text-xs">Embed code</button>
-      </div>
-      <button type="button" @click="copy(tweetText)" class="btn-ghost mt-2 w-full text-xs">Copy Twitter post</button>
-      <p x-show="copied" x-cloak class="mt-2 text-center text-xs text-brand-beer">Copied!</p>
+  <% if (typeof emailUnverified !== 'undefined' && emailUnverified) { %>
+    <div class="flash-info mb-6 text-sm">
+      Verify your email in <a href="/dashboard/security" class="underline">Security settings</a>.
     </div>
-  </div>
+  <% } %>
 
-  <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-    <div class="card animate-fade-in-up anim-delay-300">
-      <p class="text-sm text-white/50">Total earned</p>
+  <div class="grid gap-4 lg:grid-cols-3 lg:gap-6">
+    <div class="stat-hero stat-hero-primary lg:col-span-2 animate-fade-in-up">
+      <p class="text-sm font-medium text-white/60">Total earned</p>
       <p
-        class="mt-1 font-display text-2xl font-bold text-brand-beer transition-transform"
+        class="mt-2 font-display text-4xl font-bold text-brand-beer lg:text-5xl"
         :class="totalPulse && 'animate-stat-pop'"
         x-text="totalFormatted"
       ></p>
+      <p class="mt-3 text-sm text-white/45">
+        <span :class="countPulse && 'text-white'" x-text="count"></span> supporters · live updates via SSE
+      </p>
     </div>
-    <div class="card animate-fade-in-up anim-delay-400">
-      <p class="text-sm text-white/50">Supporters</p>
-      <p
-        class="mt-1 font-display text-2xl font-bold transition-transform"
-        :class="countPulse && 'animate-stat-pop'"
-        x-text="count"
-      ></p>
+
+    <div class="stat-hero animate-fade-in-up anim-delay-100" x-data="shareKit(<%- JSON.stringify({ profileUrl, handle: user.handle, displayName: user.displayName }) %>)">
+      <p class="text-xs uppercase tracking-wide text-white/40">Share kit</p>
+      <div class="mt-3 flex items-center gap-4">
+        <img src="/dashboard/qr.png" alt="QR" class="size-20 rounded-xl border border-white/10 bg-white p-1.5" />
+        <div class="min-w-0 flex-1">
+          <p class="truncate font-mono text-xs text-brand-beer"><%= profileUrl %></p>
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            <button type="button" @click="copy(profileUrl)" class="btn-secondary px-3 py-1.5 text-xs">Copy</button>
+            <button type="button" @click="copy(embedCode)" class="btn-secondary px-3 py-1.5 text-xs">Embed</button>
+          </div>
+        </div>
+      </div>
+      <p x-show="copied" x-cloak class="mt-2 text-xs text-brand-beer">Copied!</p>
     </div>
-    <div class="card animate-fade-in-up anim-delay-500">
-      <p class="text-sm text-white/50">☕ Coffees</p>
-      <p
-        class="mt-1 font-display text-2xl font-bold transition-transform"
-        :class="coffeePulse && 'animate-stat-pop'"
-        x-text="coffeeCount"
-      ></p>
+  </div>
+
+  <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+    <div class="stat-pill animate-fade-in-up anim-delay-200">
+      <span class="text-2xl">☕</span>
+      <div>
+        <p class="text-xs text-white/45">Coffees</p>
+        <p class="text-xl font-bold" :class="coffeePulse && 'animate-stat-pop'" x-text="coffeeCount"></p>
+      </div>
     </div>
-    <div class="card animate-fade-in-up anim-delay-600">
-      <p class="text-sm text-white/50">🍺 Beers</p>
-      <p
-        class="mt-1 font-display text-2xl font-bold transition-transform"
-        :class="beerPulse && 'animate-stat-pop'"
-        x-text="beerCount"
-      ></p>
+    <div class="stat-pill animate-fade-in-up anim-delay-300">
+      <span class="text-2xl">🍺</span>
+      <div>
+        <p class="text-xs text-white/45">Beers</p>
+        <p class="text-xl font-bold" :class="beerPulse && 'animate-stat-pop'" x-text="beerCount"></p>
+      </div>
     </div>
-    <div class="card animate-fade-in-up anim-delay-700">
-      <p class="text-sm text-white/50">⭐ Tiers</p>
-      <p class="mt-1 font-display text-2xl font-bold" x-text="membershipCount"></p>
+    <div class="stat-pill animate-fade-in-up anim-delay-400">
+      <span class="text-2xl">⭐</span>
+      <div>
+        <p class="text-xs text-white/45">Tiers</p>
+        <p class="text-xl font-bold" x-text="membershipCount"></p>
+      </div>
     </div>
-    <div class="card animate-fade-in-up anim-delay-800">
-      <p class="text-sm text-white/50">💝 Custom</p>
-      <p class="mt-1 font-display text-2xl font-bold" x-text="customCount"></p>
+    <div class="stat-pill animate-fade-in-up anim-delay-500">
+      <span class="text-2xl">💝</span>
+      <div>
+        <p class="text-xs text-white/45">Custom</p>
+        <p class="text-xl font-bold" x-text="customCount"></p>
+      </div>
     </div>
   </div>
 
   <% if (user.goalAmount > 0) { %>
-    <div class="card mt-8 animate-fade-in-up anim-delay-700" :class="goalPulse && 'animate-pulse-glow'">
+    <div class="card-static mt-6 animate-fade-in-up anim-delay-500" :class="goalPulse && 'ring-1 ring-brand-beer/30'">
       <div class="flex justify-between text-sm">
         <span class="text-white/60"><%= user.goalTitle || 'Funding goal' %></span>
-        <span class="text-brand-beer"><span x-text="totalFormatted"></span> / <%= formatMoney(user.goalAmount) %></span>
+        <span class="font-medium text-brand-beer"><span x-text="totalFormatted"></span> / <%= formatMoney(user.goalAmount) %></span>
       </div>
-      <div class="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
-        <div
-          class="h-full rounded-full bg-brand-beer transition-all duration-700 ease-out"
-          :style="'width:' + goalProgress + '%'"
-        ></div>
+      <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10">
+        <div class="h-full rounded-full bg-brand-beer transition-all duration-700" :style="'width:' + goalProgress + '%'"></div>
       </div>
+      <p class="mt-2 text-xs text-white/35"><%= goalProgress %>% of goal</p>
     </div>
   <% } %>
 
-  <div class="mt-10 animate-fade-in-up anim-delay-800">
-    <h2 class="font-display text-xl font-semibold">Recent support</h2>
+  <div class="mt-8 grid gap-6 xl:grid-cols-3">
+    <section class="xl:col-span-2 animate-fade-in-up anim-delay-600">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="font-display text-lg font-semibold">Recent support</h2>
+        <span class="text-xs text-white/35">Live</span>
+      </div>
 
-    <div
-      x-show="showEmpty"
-      x-transition:leave="transition ease-in duration-300"
-      x-transition:leave-start="opacity-100 scale-100"
-      x-transition:leave-end="opacity-0 scale-95"
-      class="card mt-4 text-center text-white/50"
-    >
-      <p class="animate-float text-4xl">🍻</p>
-      <p class="mt-2">No tips yet — share your link to get started!</p>
-    </div>
+      <div x-show="showEmpty" class="card-static py-12 text-center text-white/45">
+        <p class="animate-float text-4xl">🍻</p>
+        <p class="mt-3 font-medium">No tips yet</p>
+        <p class="mt-1 text-sm">Share your link to get your first supporter.</p>
+      </div>
 
-    <div x-show="!showEmpty" class="mt-4 space-y-3">
-      <template x-for="item in recentSupport" :key="item.id">
-        <div
-          class="card flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
-          :class="item.isNew && 'sse-new-row'"
-          x-transition:enter="transition ease-out duration-400"
-          x-transition:enter-start="opacity-0 -translate-y-3"
-          x-transition:enter-end="opacity-100 translate-y-0"
-        >
-          <div>
-            <p class="font-medium">
-              <span x-text="item.supporterName"></span>
-              <span class="text-white/40">·</span>
-              <span class="text-brand-beer" x-text="item.formattedAmount"></span>
-              <span class="ml-1 text-xs" x-text="item.emoji"></span>
-            </p>
-            <p x-show="item.message" class="mt-1 text-sm text-white/60" x-text="'&quot;' + item.message + '&quot;'"></p>
+      <div x-show="!showEmpty" class="space-y-2">
+        <template x-for="item in recentSupport" :key="item.id">
+          <div
+            class="card-static flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+            :class="item.isNew && 'sse-new-row'"
+          >
+            <div class="flex items-start gap-3">
+              <span class="mt-0.5 text-lg" x-text="item.emoji"></span>
+              <div>
+                <p class="font-medium">
+                  <span x-text="item.supporterName"></span>
+                  <span class="ml-2 text-brand-beer" x-text="item.formattedAmount"></span>
+                </p>
+                <p x-show="item.message" class="mt-0.5 text-sm text-white/50" x-text="item.message"></p>
+              </div>
+            </div>
+            <time class="shrink-0 text-xs text-white/35" x-text="item.isNew ? 'Just now' : item.dateLabel"></time>
           </div>
-          <time class="text-xs text-white/35" x-text="item.isNew ? 'Just now' : item.dateLabel"></time>
-        </div>
-      </template>
-    </div>
+        </template>
+      </div>
+    </section>
+
+    <section class="animate-fade-in-up anim-delay-700">
+      <h2 class="mb-4 font-display text-lg font-semibold">Quick actions</h2>
+      <div class="grid gap-2">
+        <a href="/dashboard/posts" class="stat-pill hover:border-brand-beer/20">
+          <span class="text-xl">📝</span>
+          <div><p class="font-medium">New post</p><p class="text-xs text-white/40">Share an update</p></div>
+        </a>
+        <a href="/dashboard/tiers" class="stat-pill hover:border-brand-beer/20">
+          <span class="text-xl">⭐</span>
+          <div><p class="font-medium">Manage tiers</p><p class="text-xs text-white/40">Memberships</p></div>
+        </a>
+        <a href="/dashboard/shop" class="stat-pill hover:border-brand-beer/20">
+          <span class="text-xl">🛍️</span>
+          <div><p class="font-medium">Add shop item</p><p class="text-xs text-white/40">Digital extras</p></div>
+        </a>
+        <a href="/dashboard/settings" class="stat-pill hover:border-brand-beer/20">
+          <span class="text-xl">⚙️</span>
+          <div><p class="font-medium">Edit profile</p><p class="text-xs text-white/40">Branding & prices</p></div>
+        </a>
+      </div>
+    </section>
   </div>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/dashboard-shell-close') %>
+<%- include('../partials/dashboard-footer') %>

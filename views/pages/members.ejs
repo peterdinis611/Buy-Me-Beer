@@ -1,20 +1,22 @@
 <%- include('../partials/head', { title }) %>
-<%- include('../partials/nav') %>
+<%- include('../partials/dashboard-shell-open', { active: 'members', user }) %>
 
-<div class="mx-auto max-w-3xl px-4 py-10">
-  <h1 class="font-display text-3xl font-bold">Members</h1>
-  <p class="mt-2 text-white/50">Active monthly and tier supporters.</p>
+<div class="mx-auto max-w-3xl">
+  <header class="page-header">
+    <h1 class="page-title">Members</h1>
+    <p class="page-subtitle">Active monthly and tier supporters.</p>
+  </header>
 
   <% if (members.length === 0) { %>
-    <div class="card mt-8 text-center text-white/50">
+    <div class="card-static py-12 text-center text-white/50">
       <p class="text-4xl">👥</p>
       <p class="mt-2">No active members yet.</p>
       <a href="/dashboard/tiers" class="btn-secondary mt-4 inline-flex">Set up tiers</a>
     </div>
   <% } else { %>
-    <div class="mt-8 space-y-3">
+    <div class="space-y-3">
       <% members.forEach(function(m) { %>
-        <div class="card flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div class="card-static flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p class="font-medium"><%= m.supporterName %></p>
             <p class="text-sm text-white/50"><%= tierMap[m.tierId] || 'Tier' %> · <%= m.supporterEmail || 'No email' %></p>
@@ -29,8 +31,7 @@
       <% }) %>
     </div>
   <% } %>
-
-  <a href="/dashboard" class="btn-ghost mt-8 inline-flex">← Dashboard</a>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/dashboard-shell-close') %>
+<%- include('../partials/dashboard-footer') %>

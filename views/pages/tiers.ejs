@@ -1,9 +1,11 @@
 <%- include('../partials/head', { title }) %>
-<%- include('../partials/nav') %>
+<%- include('../partials/dashboard-shell-open', { active: 'tiers', user }) %>
 
-<div class="mx-auto max-w-2xl px-4 py-10" x-data="confirmDelete()">
-  <h1 class="animate-fade-in-up font-display text-3xl font-bold">Support tiers</h1>
-  <p class="animate-fade-in-up anim-delay-100 mt-2 text-white/50">Monthly subscriptions & one-time support tiers.</p>
+<div class="mx-auto max-w-2xl" x-data="confirmDelete()">
+  <header class="page-header">
+    <h1 class="page-title">Support tiers</h1>
+    <p class="page-subtitle">Monthly subscriptions & one-time support tiers.</p>
+  </header>
 
   <div class="mt-8 space-y-3">
     <% tiers.forEach(function(tier, i) { %>
@@ -77,8 +79,7 @@
     </div>
     <button type="submit" class="btn-primary">Save tier</button>
   </form>
-
-  <a href="/dashboard" class="btn-ghost animate-fade-in anim-delay-500 mt-6 inline-flex">← Dashboard</a>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/dashboard-shell-close') %>
+<%- include('../partials/dashboard-footer') %>

@@ -66,6 +66,14 @@ router.get("/events", requireAuth, (req, res) => {
 
 router.use(requireAuth, requireVerifiedEmail)
 
+router.use((req, res, next) => {
+  const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`
+  if (req.session.user?.handle) {
+    res.locals.dashboardProfileUrl = buildProfileUrl(baseUrl, req.session.user.handle)
+  }
+  next()
+})
+
 router.get("/", async (req, res) => {
   const user = await findUserById(req.session.user!.id)
   if (!user) {

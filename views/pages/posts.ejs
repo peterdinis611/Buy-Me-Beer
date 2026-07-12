@@ -1,11 +1,13 @@
 <%- include('../partials/head', { title }) %>
-<%- include('../partials/nav') %>
+<%- include('../partials/dashboard-shell-open', { active: 'posts', user }) %>
 
-<div class="mx-auto max-w-3xl px-4 py-10">
-  <h1 class="font-display text-3xl font-bold">Posts / Updates</h1>
-  <p class="mt-2 text-white/50">Share public updates or member-only content.</p>
+<div class="mx-auto max-w-3xl">
+  <header class="page-header">
+    <h1 class="page-title">Posts / Updates</h1>
+    <p class="page-subtitle">Share public updates or member-only content.</p>
+  </header>
 
-  <form action="/dashboard/posts" method="post" class="card mt-8 space-y-4">
+  <form action="/dashboard/posts" method="post" class="card-static space-y-4">
     <h2 class="font-semibold">New post</h2>
     <input class="input" type="text" name="title" placeholder="Title" required maxlength="120" />
     <textarea class="input min-h-[120px] resize-y" name="body" placeholder="Write your update…" maxlength="5000"></textarea>
@@ -31,7 +33,7 @@
   <% if (items.length > 0) { %>
     <div class="mt-10 space-y-4">
       <% items.forEach(function(post) { %>
-        <div class="card text-left">
+        <div class="card-static text-left">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p class="font-semibold"><%= post.title %></p>
@@ -52,4 +54,5 @@
   <% } %>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/dashboard-shell-close') %>
+<%- include('../partials/dashboard-footer') %>

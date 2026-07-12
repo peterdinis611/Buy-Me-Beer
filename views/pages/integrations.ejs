@@ -1,18 +1,20 @@
 <%- include('../partials/head', { title }) %>
-<%- include('../partials/nav') %>
+<%- include('../partials/dashboard-shell-open', { active: 'integrations', user }) %>
 
-<div class="mx-auto max-w-2xl px-4 py-10">
-  <h1 class="font-display text-3xl font-bold">Integrations</h1>
-  <p class="mt-2 text-white/50">Notify your community when someone joins a membership.</p>
+<div class="mx-auto max-w-2xl">
+  <header class="page-header">
+    <h1 class="page-title">Integrations</h1>
+    <p class="page-subtitle">Notify your community when someone joins a membership.</p>
+  </header>
 
-  <form action="/dashboard/integrations" method="post" class="mt-8 space-y-6">
-    <div class="card space-y-4">
+  <form action="/dashboard/integrations" method="post" class="space-y-6">
+    <div class="card-static space-y-4">
       <h2 class="font-semibold">Discord</h2>
       <p class="text-sm text-white/50">Paste a Discord channel webhook URL. New members trigger a message with their name and tier.</p>
       <input class="input font-mono text-sm" type="url" name="discordWebhookUrl" value="<%= user.discordWebhookUrl %>" placeholder="https://discord.com/api/webhooks/..." />
     </div>
 
-    <div class="card space-y-4">
+    <div class="card-static space-y-4">
       <h2 class="font-semibold">Slack</h2>
       <p class="text-sm text-white/50">Incoming webhook URL for your Slack workspace.</p>
       <input class="input font-mono text-sm" type="url" name="slackWebhookUrl" value="<%= user.slackWebhookUrl %>" placeholder="https://hooks.slack.com/services/..." />
@@ -22,4 +24,5 @@
   </form>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/dashboard-shell-close') %>
+<%- include('../partials/dashboard-footer') %>

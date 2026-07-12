@@ -1,12 +1,14 @@
 <%- include('../partials/head', { title }) %>
-<%- include('../partials/nav') %>
+<%- include('../partials/dashboard-shell-open', { active: 'settings', user }) %>
 
 <div
-  class="mx-auto max-w-2xl px-4 py-10"
+  class="mx-auto max-w-2xl"
   x-data="settingsForm(<%- JSON.stringify({ bio: user.bio, coffeePriceEuros: coffeePriceEuros, beerPriceEuros: beerPriceEuros, goalEuros: goalEuros, primaryColor: user.primaryColor || '#F5A623' }) %>)"
 >
-  <h1 class="animate-fade-in-up font-display text-3xl font-bold">Profile settings</h1>
-  <p class="animate-fade-in-up anim-delay-100 mt-2 text-white/50">Customize your public creator page.</p>
+  <header class="page-header">
+    <h1 class="page-title">Profile settings</h1>
+    <p class="page-subtitle">Customize your public creator page.</p>
+  </header>
 
   <form action="/dashboard/settings" method="post" class="animate-fade-in-up anim-delay-200 mt-8 space-y-6">
     <div class="card space-y-4">
@@ -133,4 +135,5 @@
   </div>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/dashboard-shell-close') %>
+<%- include('../partials/dashboard-footer') %>

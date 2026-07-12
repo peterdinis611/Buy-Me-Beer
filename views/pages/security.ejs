@@ -1,45 +1,34 @@
 <%- include('../partials/head', { title }) %>
-<%- include('../partials/nav') %>
+<%- include('../partials/dashboard-shell-open', { active: 'security', user }) %>
 
-<div class="mx-auto max-w-2xl px-4 py-10">
-  <h1 class="font-display text-3xl font-bold">Security</h1>
+<div class="mx-auto max-w-2xl">
+  <header class="page-header">
+    <h1 class="page-title">Security</h1>
+    <p class="page-subtitle">Password and email verification.</p>
+  </header>
 
   <% if (typeof emailUnverified !== 'undefined' && emailUnverified) { %>
-    <div class="flash-info mt-4">
-      Email not verified.
-      <form action="/dashboard/security/resend-verification" method="post" class="mt-2 inline">
-        <button type="submit" class="text-brand-beer underline">Resend link</button>
+    <div class="flash-info mb-6">
+      Your email is not verified yet.
+      <form action="/dashboard/security/resend-verification" method="post" class="mt-3">
+        <button type="submit" class="btn-secondary text-sm">Resend verification email</button>
       </form>
     </div>
   <% } %>
 
-  <div class="card mt-8 space-y-4">
+  <form action="/dashboard/security/password" method="post" class="card-static space-y-4">
     <h2 class="font-semibold">Change password</h2>
-    <form action="/dashboard/security/password" method="post" class="space-y-4">
-      <div>
-        <label class="label" for="currentPassword">Current password</label>
-        <input class="input" type="password" id="currentPassword" name="currentPassword" required />
-      </div>
-      <div>
-        <label class="label" for="newPassword">New password</label>
-        <input class="input" type="password" id="newPassword" name="newPassword" required minlength="8" />
-      </div>
-      <button type="submit" class="btn-primary">Update password</button>
-    </form>
-  </div>
-
-  <div class="card mt-6">
-    <h2 class="font-semibold">Email</h2>
-    <p class="mt-2 text-sm text-white/60"><%= user.email %></p>
-    <p class="mt-1 text-xs <%= user.emailVerified ? 'text-emerald-400' : 'text-amber-400' %>">
-      <%= user.emailVerified ? '✓ Verified' : 'Not verified' %>
-    </p>
-  </div>
-
-  <div class="mt-6 flex gap-2">
-    <a href="/dashboard" class="btn-ghost">← Dashboard</a>
-    <a href="/dashboard/tiers" class="btn-ghost">Membership tiers</a>
-  </div>
+    <div>
+      <label class="label" for="currentPassword">Current password</label>
+      <input class="input" type="password" id="currentPassword" name="currentPassword" required autocomplete="current-password" />
+    </div>
+    <div>
+      <label class="label" for="newPassword">New password</label>
+      <input class="input" type="password" id="newPassword" name="newPassword" required minlength="8" autocomplete="new-password" />
+    </div>
+    <button type="submit" class="btn-primary">Update password</button>
+  </form>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/dashboard-shell-close') %>
+<%- include('../partials/dashboard-footer') %>
